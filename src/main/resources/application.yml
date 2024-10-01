@@ -22,4 +22,24 @@ downstream:
         path: /get_light_level/{mac}
       getBatteryLevel:
         path: /get_battery_level/{mac}
+  devices:
+    - mac: "d8:85:46:5b:0c:55"
+      name: OfficeLeft
+      groups: ["Office", "Seasonal", "All"]
+    - mac: "de:75:b8:79:20:4c"
+      name: OfficeMiddle
+      groups: ["Office", "Seasonal", "All"]
+    - mac: "de:b8:32:e4:63:21"
+      name: OfficeRight
+      groups: ["Office", "Seasonal", "All"]
 
+
+
+#  macMap.put("c6:08:10:c8:f7:64", "KitchenRear");
+#  macMap.put("d0:e4:4e:28:c5:ae", "KitchenSide");
+#  macMap.put("dc:e4:75:97:b0:60", "LivingLeft");
+#  macMap.put("cd:1e:bd:f5:9b:af", "LivingMiddle");
+#  macMap.put("fd:a1:05:1a:e8:d6", "LivingRight");
+#  macMap.put("d8:85:46:5b:0c:55", "OfficeLeft");
+#  macMap.put("de:75:b8:79:20:4c", "OfficeMiddle");
+#  macMap.put("de:b8:32:e4:63:21", "OfficeRight");

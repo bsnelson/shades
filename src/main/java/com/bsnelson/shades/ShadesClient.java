@@ -26,16 +26,15 @@ public class ShadesClient {
                 .bodyToMono(String.class);
     }
 
-//    public Mono<String> getShadeResponse(String command, String mac, String position, MultiValueMap<String, String> options) {
-//        return shadesWebClient
-//            .get()
-//            .uri(
-//                 uriBuilder ->
-//                    uriBuilder
-//                        .path(apiConfiguration.getShade().getPath())
-//                        .queryParams(options)
-//                        .build(id))
-//                .retrieve()
-//                .bodyToMono(String.class);
-//    }
+    public Mono<String> getShadeState(String mac) {
+        return shadesWebClient
+            .get()
+            .uri(
+                 uriBuilder ->
+                    uriBuilder
+                        .path(apiConfiguration.getGetShadeState().getPath())
+                        .build(mac))
+                .retrieve()
+                .bodyToMono(String.class);
+    }
 }

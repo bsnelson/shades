@@ -29,7 +29,7 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-validation")
 //	implementation("io.swagger.core.v3:swagger-core-jakarta")
 	compileOnly("org.projectlombok:lombok")
-	developmentOnly("org.springframework.boot:spring-boot-docker-compose")
+	//developmentOnly("org.springframework.boot:spring-boot-docker-compose")
 	annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 	annotationProcessor("org.projectlombok:lombok")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")

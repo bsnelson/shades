@@ -7,12 +7,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.http.MediaType;
 import reactor.core.publisher.Mono;
 
-import java.awt.*;
-
 @AllArgsConstructor
 @RestController
 @Slf4j
-public class ShadesController {
+public class ListController {
     private ShadesService shadesService;
 
     @GetMapping(

@@ -8,29 +8,26 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.MultiValueMap;
-import org.springframework.validation.annotation.Validated;
+
+import java.util.List;
 
 @Configuration
 @Data
 @NoArgsConstructor
-@ConfigurationProperties("downstream.api.shade")
+@ConfigurationProperties("downstream")
 @EnableConfigurationProperties
-public class ApiConfiguration {
-    private ApiEndpoint listDevices;
-    private ApiEndpoint getShadeState;
-
-    @Getter
-    @Value("${downstream.connectIp}")
-    private String connectIpAddress;
+public class DeviceConfiguration {
+    private List<Devices> devices;
 
     @Data
     @AllArgsConstructor
     @Valid
     @NoArgsConstructor
     @Builder
-    public static class ApiEndpoint {
+    public static class Devices {
         @NotBlank
-        private String path;
-        private MultiValueMap<String, String> queryParams;
+        private String mac;
+        private String name;
+        private List<String> groups;
     }
 }
