@@ -14,16 +14,28 @@ public class ShadesClient {
     private WebClient shadesWebClient;
     private ApiConfiguration apiConfiguration;
 
-    public Mono<String> getShadeResponse(String id, MultiValueMap<String, String> options) {
+    public Mono<String> getDeviceList() {
         return shadesWebClient
-            .get()
-            .uri(
-                 uriBuilder ->
-                    uriBuilder
-                        .path(apiConfiguration.getShade().getPath())
-                        .queryParams(options)
-                        .build(id))
+                .get()
+                .uri(
+                        uriBuilder ->
+                                uriBuilder
+                                        .path(apiConfiguration.getListDevices().getPath())
+                                        .build())
                 .retrieve()
                 .bodyToMono(String.class);
     }
+
+//    public Mono<String> getShadeResponse(String command, String mac, String position, MultiValueMap<String, String> options) {
+//        return shadesWebClient
+//            .get()
+//            .uri(
+//                 uriBuilder ->
+//                    uriBuilder
+//                        .path(apiConfiguration.getShade().getPath())
+//                        .queryParams(options)
+//                        .build(id))
+//                .retrieve()
+//                .bodyToMono(String.class);
+//    }
 }
