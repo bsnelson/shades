@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: shades
+
+downstream:
+  connectIp: 192.168.1.30
+  connectPort: 3000
+  api:
+    shade:
+      listDevicesPath: /list_devices
+      openShadePath: /open_shade/{mac}
+      closeShadePath: /close_shade/{mac}
+      setShadePositionPath: /set_shade_position/{mac}/{position}
+      stopShadePath: /stop_shade/{mac}
+      getShadeStatePath: /get_shade_state/{mac}
+      getLightLevelPath: /get_light_level/{mac}
+      getBatteryLevelPath: /get_battery_level/{mac}
+
