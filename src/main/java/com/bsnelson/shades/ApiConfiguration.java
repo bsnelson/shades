@@ -2,11 +2,8 @@ package com.bsnelson.shades;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -20,6 +17,10 @@ import org.springframework.validation.annotation.Validated;
 @EnableConfigurationProperties
 public class ApiConfiguration {
     private ApiEndpoint listDevices;
+
+    @Getter
+    @Value("${downstream.connectIp}")
+    private String connectIpAddress;
 
     @Data
     @AllArgsConstructor

@@ -3,8 +3,7 @@ spring:
     name: shades
 
 downstream:
-  connectIp: 192.168.1.30
-  connectPort: 3000
+  connectIp: http://192.168.1.30:3000
   api:
     shade:
       listDevices:
