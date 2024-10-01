@@ -1,4 +1,4 @@
-package com.bsnelson.shades;
+package com.bsnelson.shades.config;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -9,25 +9,27 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.MultiValueMap;
 
-import java.util.List;
-
 @Configuration
 @Data
 @NoArgsConstructor
-@ConfigurationProperties("downstream")
+@ConfigurationProperties("downstream.api.shade")
 @EnableConfigurationProperties
-public class DeviceConfiguration {
-    private List<Devices> devices;
+public class ApiConfiguration {
+    private ApiEndpoint listDevices;
+    private ApiEndpoint getShadeState;
+
+    @Getter
+    @Value("${downstream.connectIp}")
+    private String connectIpAddress;
 
     @Data
     @AllArgsConstructor
     @Valid
     @NoArgsConstructor
     @Builder
-    public static class Devices {
+    public static class ApiEndpoint {
         @NotBlank
-        private String mac;
-        private String name;
-        private List<String> groups;
+        private String path;
+        private MultiValueMap<String, String> queryParams;
     }
 }

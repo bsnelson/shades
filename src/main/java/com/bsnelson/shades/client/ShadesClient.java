@@ -1,9 +1,9 @@
-package com.bsnelson.shades;
+package com.bsnelson.shades.client;
 
+import com.bsnelson.shades.config.ApiConfiguration;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 

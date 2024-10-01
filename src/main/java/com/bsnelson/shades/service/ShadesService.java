@@ -1,5 +1,7 @@
-package com.bsnelson.shades;
+package com.bsnelson.shades.service;
 
+import com.bsnelson.shades.client.ShadesClient;
+import com.bsnelson.shades.config.DeviceConfiguration;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
