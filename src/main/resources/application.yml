@@ -32,6 +32,21 @@ downstream:
     - mac: "de:b8:32:e4:63:21"
       name: OfficeRight
       groups: ["Office", "Seasonal", "All"]
+    - mac: "c6:08:10:c8:f7:64"
+      name: KitchenRear
+      groups: ["Kitchen", "All"]
+    - mac: "d0:e4:4e:28:c5:ae"
+      name: KitchenSide
+      groups: ["Kitchen", "Seasonal", "All"]
+    - mac: "dc:e4:75:97:b0:60"
+      name: LivingLeft
+      groups: ["Living", "All"]
+    - mac: "cd:1e:bd:f5:9b:af"
+      name: LivingMiddle
+      groups: ["Living", "All"]
+    - mac: "fd:a1:05:1a:e8:d6"
+      name: LivingRight
+      groups: ["Living", "All"]
 
 
 

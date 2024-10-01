@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
+import java.util.List;
+
 @AllArgsConstructor
 @Service
 @Configuration
@@ -22,26 +24,24 @@ public class ShadesService {
     }
 
     public Mono<String> getStates() {
-        return Mono.zip(
-                shadesClient
-                        .getShadeState(deviceConfiguration.getDevices().get(0).getMac())
-                        .subscribeOn(Schedulers.boundedElastic())
-                        .onErrorComplete(),
-                shadesClient
-                        .getShadeState(deviceConfiguration.getDevices().get(1).getMac())
-                        .subscribeOn(Schedulers.boundedElastic())
-                        .onErrorComplete(),
-                shadesClient
-                        .getShadeState(deviceConfiguration.getDevices().get(2).getMac())
+        // Create a list of Monos dynamically from the device list
+        List<Mono<String>> shadeMonos = deviceConfiguration.getDevices().stream()
+                .map(device -> shadesClient.getShadeState(device.getMac())
                         .subscribeOn(Schedulers.boundedElastic())
                         .onErrorComplete())
-                .flatMap(
-                        tuple -> {
-                            String ret1 = tuple.getT1();
-                            String ret2 = tuple.getT2();
-                            String ret3 = tuple.getT3();
-                            return Mono.just("{ \"responses\": [ " + ret1 + "," + ret2 + "," + ret3 + "] }");
-                        }
-                );
+                .toList();
+
+        // Use Mono.zip to combine the Monos, converting the list to an array
+        return Mono.zip(shadeMonos, responses -> {
+            StringBuilder result = new StringBuilder("{ \"responses\": [");
+            for (int i = 0; i < responses.length; i++) {
+                result.append(responses[i]);
+                if (i < responses.length - 1) {
+                    result.append(", ");
+                }
+            }
+            result.append("] }");
+            return result.toString();
+        });
     }
 }
