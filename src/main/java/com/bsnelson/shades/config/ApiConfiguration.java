@@ -17,6 +17,7 @@ import org.springframework.util.MultiValueMap;
 public class ApiConfiguration {
     private ApiEndpoint listDevices;
     private ApiEndpoint getShadeState;
+    private ApiEndpoint setShadePosition;
 
     @Getter
     @Value("${downstream.connectIp}")

@@ -27,7 +27,8 @@ public class ShadesClient {
     }
 
     public Mono<String> getShadeState(String mac) {
-        return shadesWebClient
+        log.debug("In getState(" + mac + ")");
+        Mono<String> result = shadesWebClient
             .get()
             .uri(
                  uriBuilder ->
@@ -36,5 +37,24 @@ public class ShadesClient {
                         .build(mac))
                 .retrieve()
                 .bodyToMono(String.class);
+        log.debug("Return getState(" + mac + ")");
+        return result;
     }
+
+    public Mono<String> setShadePosition(String mac, String position) {
+        log.debug("In setState(" + mac + ")");
+        Mono<String> result = shadesWebClient
+                .get()
+                .uri(
+                        uriBuilder ->
+                                uriBuilder
+                                        .path(apiConfiguration.getSetShadePosition().getPath())
+                                        .queryParam("close_upwards", "1")
+                                        .build(mac,position))
+                .retrieve()
+                .bodyToMono(String.class);
+        log.debug("Return getState(" + mac + ")");
+        return result;
+    }
+
 }

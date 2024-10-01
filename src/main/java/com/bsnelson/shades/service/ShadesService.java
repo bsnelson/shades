@@ -35,6 +35,29 @@ public class ShadesService {
         return Mono.zip(shadeMonos, responses -> {
             StringBuilder result = new StringBuilder("{ \"responses\": [");
             for (int i = 0; i < responses.length; i++) {
+                log.debug("Got a response");
+                result.append(responses[i]);
+                if (i < responses.length - 1) {
+                    result.append(", ");
+                }
+            }
+            result.append("] }");
+            return result.toString();
+        });
+    }
+    public Mono<String> setPositions(String position) {
+        // Create a list of Monos dynamically from the device list
+        List<Mono<String>> shadeMonos = deviceConfiguration.getDevices().stream()
+                .map(device -> shadesClient.setShadePosition(device.getMac(), position)
+                        .subscribeOn(Schedulers.boundedElastic())
+                        .onErrorComplete())
+                .toList();
+
+        // Use Mono.zip to combine the Monos, converting the list to an array
+        return Mono.zip(shadeMonos, responses -> {
+            StringBuilder result = new StringBuilder("{ \"responses\": [");
+            for (int i = 0; i < responses.length; i++) {
+                log.debug("Got a response");
                 result.append(responses[i]);
                 if (i < responses.length - 1) {
                     result.append(", ");
