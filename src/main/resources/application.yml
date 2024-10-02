@@ -25,27 +25,35 @@ downstream:
   devices:
     - mac: "d8:85:46:5b:0c:55"
       name: OfficeLeft
+      seasonalDefault: 35
       groups: ["Office", "Seasonal", "All"]
     - mac: "de:75:b8:79:20:4c"
       name: OfficeMiddle
+      seasonalDefault: 35
       groups: ["Office", "Seasonal", "All"]
     - mac: "de:b8:32:e4:63:21"
       name: OfficeRight
+      seasonalDefault: 35
       groups: ["Office", "Seasonal", "All"]
     - mac: "c6:08:10:c8:f7:64"
       name: KitchenRear
+      seasonalDefault: 0
       groups: ["Kitchen", "All"]
     - mac: "d0:e4:4e:28:c5:ae"
       name: KitchenSide
+      seasonalDefault: 25
       groups: ["Kitchen", "Seasonal", "All"]
     - mac: "dc:e4:75:97:b0:60"
       name: LivingLeft
+      seasonalDefault: 0
       groups: ["Living", "All"]
     - mac: "cd:1e:bd:f5:9b:af"
       name: LivingMiddle
+      seasonalDefault: 0
       groups: ["Living", "All"]
     - mac: "fd:a1:05:1a:e8:d6"
       name: LivingRight
+      seasonalDefault: 0
       groups: ["Living", "All"]
 
 

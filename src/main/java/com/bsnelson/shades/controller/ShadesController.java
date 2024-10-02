@@ -43,4 +43,24 @@ public class ShadesController {
         log.debug("Finished setPositions service");
         return result;
     }
+
+    @GetMapping(
+            value = "/close",
+            produces = {MediaType.APPLICATION_JSON_VALUE})
+    public Mono<String> close() {
+        log.debug("Entering close service");
+        Mono<String> result = shadesService.setPositions("100");
+        log.debug("Finished close service");
+        return result;
+    }
+
+    @GetMapping(
+            value = "/openSeasonal",
+            produces = {MediaType.APPLICATION_JSON_VALUE})
+    public Mono<String> openSeasonal() {
+        log.debug("Entering openSeasonal service");
+        Mono<String> result = shadesService.openSeasonal();
+        log.debug("Finished openSeasonal service");
+        return result;
+    }
 }

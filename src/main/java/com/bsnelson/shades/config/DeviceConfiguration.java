@@ -26,6 +26,7 @@ public class DeviceConfiguration {
         @NotBlank
         private String mac;
         private String name;
+        private String seasonalDefault;
         private List<String> groups;
     }
 }
