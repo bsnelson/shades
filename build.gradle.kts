@@ -27,7 +27,7 @@ repositories {
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-webflux")
 	implementation("org.springframework.boot:spring-boot-starter-validation")
-//	implementation("io.swagger.core.v3:swagger-core-jakarta")
+	implementation("io.netty:netty-resolver-dns-native-macos:4.1.114.Final:osx-aarch_64")
 	compileOnly("org.projectlombok:lombok")
 	//developmentOnly("org.springframework.boot:spring-boot-docker-compose")
 	annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")

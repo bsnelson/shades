@@ -2,6 +2,7 @@ package com.bsnelson.shades.service;
 
 import com.bsnelson.shades.client.ShadesClient;
 import com.bsnelson.shades.config.DeviceConfiguration;
+import com.bsnelson.shades.models.ListDevicesResponse;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
@@ -19,7 +20,7 @@ public class ShadesService {
     private final ShadesClient shadesClient;
     private final DeviceConfiguration deviceConfiguration;
 
-    public Mono<String> getList() {
+    public Mono<ListDevicesResponse> getList() {
         return shadesClient.getDeviceList();
     }
 

@@ -1,5 +1,6 @@
 package com.bsnelson.shades.controller;
 
+import com.bsnelson.shades.models.ListDevicesResponse;
 import com.bsnelson.shades.service.ShadesService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -8,6 +9,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.http.MediaType;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 @AllArgsConstructor
 @RestController
@@ -18,8 +21,16 @@ public class ShadesController {
     @GetMapping(
         value = "/listDevices",
         produces = {MediaType.APPLICATION_JSON_VALUE})
-    public Mono<String> listDevices() {
-        return shadesService.getList();
+    public Mono<ListDevicesResponse> listDevices() {
+        Mono<ListDevicesResponse> resp = shadesService.getList();
+        resp.subscribe(
+            value -> System.out.println("QUESO listDevices nbr: " + value.getShades().size())
+        );
+        return resp
+            .map(response -> {
+                response.getShades().forEach(shade -> shade.setType("newType"));
+                return response;
+            });
     }
 
     @GetMapping(

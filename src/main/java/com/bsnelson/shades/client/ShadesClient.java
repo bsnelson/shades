@@ -1,6 +1,7 @@
 package com.bsnelson.shades.client;
 
 import com.bsnelson.shades.config.ApiConfiguration;
+import com.bsnelson.shades.models.ListDevicesResponse;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -14,7 +15,7 @@ public class ShadesClient {
     private WebClient shadesWebClient;
     private ApiConfiguration apiConfiguration;
 
-    public Mono<String> getDeviceList() {
+    public Mono<ListDevicesResponse> getDeviceList() {
         return shadesWebClient
                 .get()
                 .uri(
@@ -23,7 +24,7 @@ public class ShadesClient {
                                         .path(apiConfiguration.getListDevices().getPath())
                                         .build())
                 .retrieve()
-                .bodyToMono(String.class);
+                .bodyToMono(ListDevicesResponse.class);
     }
 
     public Mono<String> getShadeState(String mac) {
