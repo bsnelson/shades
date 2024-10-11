@@ -1,6 +1,8 @@
 package com.bsnelson.shades.client;
 
 import com.bsnelson.shades.config.ApiConfiguration;
+import com.bsnelson.shades.models.CloseAllResponse;
+import com.bsnelson.shades.models.DeviceResponse;
 import com.bsnelson.shades.models.ListDevicesResponse;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,9 +29,21 @@ public class ShadesClient {
                 .bodyToMono(ListDevicesResponse.class);
     }
 
-    public Mono<String> getShadeState(String mac) {
+    public Mono<CloseAllResponse> closeAllShades() {
+        return shadesWebClient
+            .get()
+            .uri(
+                uriBuilder ->
+                    uriBuilder
+                        .path(apiConfiguration.getCloseAllShades().getPath())
+                        .build())
+            .retrieve()
+            .bodyToMono(CloseAllResponse.class);
+    }
+
+    public Mono<DeviceResponse> getShadeState(String mac) {
         log.debug("In getState(" + mac + ")");
-        Mono<String> result = shadesWebClient
+        Mono<DeviceResponse> result = shadesWebClient
             .get()
             .uri(
                  uriBuilder ->
@@ -37,24 +51,24 @@ public class ShadesClient {
                         .path(apiConfiguration.getGetShadeState().getPath())
                         .build(mac))
                 .retrieve()
-                .bodyToMono(String.class);
+                .bodyToMono(DeviceResponse.class);
         log.debug("Return getState(" + mac + ")");
         return result;
     }
 
-    public Mono<String> setShadePosition(String mac, String position) {
+    public Mono<DeviceResponse> setShadePosition(String mac, String position) {
         log.debug("In setState(" + mac + ")");
-        Mono<String> result = shadesWebClient
+        Mono<DeviceResponse> result = shadesWebClient
                 .get()
                 .uri(
-                        uriBuilder ->
-                                uriBuilder
-                                        .path(apiConfiguration.getSetShadePosition().getPath())
-                                        .queryParam("close_upwards", "1")
-                                        .build(mac,position))
+                    uriBuilder ->
+                        uriBuilder
+                            .path(apiConfiguration.getSetShadePosition().getPath())
+                            .queryParam("close_upwards", "1")
+                            .build(mac,position))
                 .retrieve()
-                .bodyToMono(String.class);
-        log.debug("Return getState(" + mac + ")");
+                .bodyToMono(DeviceResponse.class);
+        log.debug("Return setPosition(" + mac + ")");
         return result;
     }
 

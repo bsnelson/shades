@@ -2,6 +2,9 @@ package com.bsnelson.shades.service;
 
 import com.bsnelson.shades.client.ShadesClient;
 import com.bsnelson.shades.config.DeviceConfiguration;
+import com.bsnelson.shades.models.CloseAllResponse;
+import com.bsnelson.shades.models.DeviceResponse;
+import com.bsnelson.shades.models.DevicesResponse;
 import com.bsnelson.shades.models.ListDevicesResponse;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +14,8 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @AllArgsConstructor
 @Service
@@ -24,18 +29,21 @@ public class ShadesService {
         return shadesClient.getDeviceList();
     }
 
-    public Mono<String> getStates() {
+    public Mono<CloseAllResponse> closeAllShades() {
+        return shadesClient.closeAllShades();
+    }
+    public Mono<DevicesResponse> getStates() {
         // Create a list of Monos dynamically from the device list
-        List<Mono<String>> shadeMonos = deviceConfiguration.getDevices().stream()
+        List<Mono<DeviceResponse>> shadeMonos = deviceConfiguration.getDevices().stream()
                 .map(device -> shadesClient.getShadeState(device.getMac())
                         .subscribeOn(Schedulers.boundedElastic())
                         .onErrorComplete())
                 .toList();
         return getMonos(shadeMonos);
     }
-    public Mono<String> setPositions(String position) {
+    public Mono<DevicesResponse> setPositions(String position) {
         // Create a list of Monos dynamically from the device list
-        List<Mono<String>> shadeMonos = deviceConfiguration.getDevices().stream()
+        List<Mono<DeviceResponse>> shadeMonos = deviceConfiguration.getDevices().stream()
                 .map(device -> shadesClient.setShadePosition(device.getMac(), position)
                         .subscribeOn(Schedulers.boundedElastic())
                         .onErrorComplete())
@@ -43,9 +51,9 @@ public class ShadesService {
         return getMonos(shadeMonos);
     }
 
-    public Mono<String> openSeasonal() {
+    public Mono<DevicesResponse> openSeasonal() {
         // Create a list of Monos dynamically from the device list
-        List<Mono<String>> shadeMonos = deviceConfiguration.getDevices().stream()
+        List<Mono<DeviceResponse>> shadeMonos = deviceConfiguration.getDevices().stream()
                 .map(device -> shadesClient.setShadePosition(device.getMac(), device.getSeasonalDefault())
                         .subscribeOn(Schedulers.boundedElastic())
                         .onErrorComplete())
@@ -53,19 +61,17 @@ public class ShadesService {
         return getMonos(shadeMonos);
     }
 
-    private Mono<String> getMonos(List<Mono<String>> shadeMonos) {
-        // Use Mono.zip to combine the Monos, converting the list to an array
-        return Mono.zip(shadeMonos, responses -> {
-            StringBuilder result = new StringBuilder("{ \"responses\": [");
-            for (int i = 0; i < responses.length; i++) {
-                log.debug("Got a response");
-                result.append(responses[i]);
-                if (i < responses.length - 1) {
-                    result.append(", ");
-                }
-            }
-            result.append("] }");
-            return result.toString();
-        });
-    }
-}
+    private Mono<DevicesResponse> getMonos(List<Mono<DeviceResponse>> shadeMonos) {
+        @SuppressWarnings("unchecked")
+        Mono<DeviceResponse>[] monoArray = new Mono[shadeMonos.size()];
+        monoArray = shadeMonos.toArray(monoArray);
+        return Mono.zip(
+            responses -> {
+                List<DeviceResponse> deviceResponses = Stream.of(responses)
+                    .map(response -> (DeviceResponse) response)
+                    .collect(Collectors.toList());
+                return new DevicesResponse(deviceResponses);
+            },
+            monoArray
+        );
+    }}

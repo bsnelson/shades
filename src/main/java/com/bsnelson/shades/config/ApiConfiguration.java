@@ -18,6 +18,7 @@ public class ApiConfiguration {
     private ApiEndpoint listDevices;
     private ApiEndpoint getShadeState;
     private ApiEndpoint setShadePosition;
+    private ApiEndpoint closeAllShades;
 
     @Getter
     @Value("${downstream.connectIp}")

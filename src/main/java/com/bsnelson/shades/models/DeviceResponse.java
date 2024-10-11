@@ -5,22 +5,14 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CloseAllResponse {
+public class DeviceResponse {
     String result;
     String version;
-    String msg;
-    List<Result> results;
-    @Data
-    public static class Result {
-        String mac;
-        String name;
-        String result;
-        List<String> errors;
-    }
+    String mac;
+    String position;
+    Boolean closed_upwards;
 }
