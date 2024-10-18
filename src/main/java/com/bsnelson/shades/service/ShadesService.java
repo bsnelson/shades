@@ -61,10 +61,27 @@ public class ShadesService {
         return getMonos(shadeMonos);
     }
 
+    public Mono<DevicesResponse> reopen() {
+        // Create a list of Monos dynamically from the device list
+        System.out.println("Starting reopen");
+        List<Mono<DeviceResponse>> shadeMonos = deviceConfiguration.getDevices().stream()
+            .map(device -> shadesClient.getShadeState(device.getMac())
+                .subscribeOn(Schedulers.boundedElastic())
+                .onErrorComplete())
+            .toList();
+        Mono<DevicesResponse> response = getMonos(shadeMonos).cache();
+        response.subscribe(
+            value -> value.getResponses()
+                .forEach(i -> System.out.println(i.getMac() + " value is " + i.getPosition()))
+        );
+        return response;
+    }
+
     private Mono<DevicesResponse> getMonos(List<Mono<DeviceResponse>> shadeMonos) {
         @SuppressWarnings("unchecked")
         Mono<DeviceResponse>[] monoArray = new Mono[shadeMonos.size()];
         monoArray = shadeMonos.toArray(monoArray);
+        System.out.println("Hit get with " + shadeMonos.size());
         return Mono.zip(
             responses -> {
                 List<DeviceResponse> deviceResponses = Stream.of(responses)

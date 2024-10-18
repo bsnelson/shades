@@ -86,4 +86,14 @@ public class ShadesController {
         log.debug("Finished openSeasonal service");
         return result;
     }
+
+    @GetMapping(
+        value = "/reopen",
+        produces = {MediaType.APPLICATION_JSON_VALUE})
+    public Mono<DevicesResponse> reopen() {
+        log.debug("Entering reopen service");
+        Mono<DevicesResponse> result = shadesService.reopen();
+        log.debug("Finished reopen service");
+        return result;
+    }
 }

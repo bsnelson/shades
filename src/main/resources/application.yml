@@ -3,9 +3,13 @@ server:
 spring:
   application:
     name: shades
+logging:
+  level:
+    ROOT: INFO
 
 downstream:
-  connectIp: http://192.168.1.30:3000
+  # connectIp: http://192.168.1.30:3000
+  connectIp: http://localhost:8083
   api:
     shade:
       listDevices:
