@@ -24,6 +24,10 @@ public class ApiConfiguration {
     @Value("${downstream.connectIp}")
     private String connectIpAddress;
 
+    @Getter
+    @Value("${downstream.retries}")
+    private String retries;
+
     @Data
     @AllArgsConstructor
     @Valid
