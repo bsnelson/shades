@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.http.MediaType;
+import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -35,27 +36,27 @@ public class ShadesController {
             });
     }
 
-//    @GetMapping(
-//            value = "/getStates",
-//            produces = {MediaType.APPLICATION_JSON_VALUE})
-//    public Mono<DevicesResponse> getStates() {
-//        log.debug("Entering getStates service");
-//        Mono<DevicesResponse> result = shadesService.getStates();
-//        log.debug("Finished getStates service");
-//        return result;
-//    }
-//
-//    @GetMapping(
-//            value = "/setPositions/{position}",
-//            produces = {MediaType.APPLICATION_JSON_VALUE})
-//    public Mono<DevicesResponse> setPositions(
-//            @PathVariable("position")
-//            String position) {
-//        log.debug("Entering setPositions service");
-//        Mono<DevicesResponse> result = shadesService.setPositions(position);
-//        log.debug("Finished setPositions service");
-//        return result;
-//    }
+    @GetMapping(
+            value = "/getStates",
+            produces = {MediaType.APPLICATION_JSON_VALUE})
+    public Mono<DevicesResponse> getStates() {
+        log.debug("Entering getStates service");
+        Mono<DevicesResponse> result = shadesService.getStates();
+        log.debug("Finished getStates service");
+        return result;
+    }
+
+    @GetMapping(
+            value = "/setPositions/{position}",
+            produces = {MediaType.APPLICATION_JSON_VALUE})
+    public Mono<DevicesResponse> setPositions(
+            @PathVariable("position")
+            String position) {
+        log.debug("Entering setPositions service");
+        Mono<DevicesResponse> result = shadesService.setPositions(position);
+        log.debug("Finished setPositions service");
+        return result;
+    }
 
     @GetMapping(
         value = "/close",
@@ -67,33 +68,38 @@ public class ShadesController {
         return result;
     }
 
-//    @GetMapping(
-//        value = "/closeOld",
-//        produces = {MediaType.APPLICATION_JSON_VALUE})
-//    public Mono<DevicesResponse> close() {
-//        log.debug("Entering close service");
-//        Mono<DevicesResponse> result = shadesService.setPositions("100");
-//        log.debug("Finished close service");
-//        return result;
-//    }
-//
-//    @GetMapping(
-//            value = "/openSeasonal",
-//            produces = {MediaType.APPLICATION_JSON_VALUE})
-//    public Mono<DevicesResponse> openSeasonal() {
-//        log.debug("Entering openSeasonal service");
-//        Mono<DevicesResponse> result = shadesService.openSeasonal();
-//        log.debug("Finished openSeasonal service");
-//        return result;
-//    }
+    @GetMapping(
+        value = "/closeOld",
+        produces = {MediaType.APPLICATION_JSON_VALUE})
+    public Mono<DevicesResponse> close() {
+        log.debug("Entering close service");
+        Mono<DevicesResponse> result = shadesService.setPositions("100");
+        log.debug("Finished close service");
+        return result;
+    }
+
+    @GetMapping(
+            value = "/openSeasonal",
+            produces = {MediaType.APPLICATION_JSON_VALUE})
+    public Mono<DevicesResponse> openSeasonal() {
+        log.debug("Entering openSeasonal service");
+        Mono<DevicesResponse> result = shadesService.openSeasonal();
+        log.debug("Finished openSeasonal service");
+        return result;
+    }
 
     @GetMapping(
         value = "/reopen",
         produces = {MediaType.APPLICATION_JSON_VALUE})
     public Mono<DevicesResponse> reopen() {
         log.info("Entering reopen service");
-        Mono<DevicesResponse> result = shadesService.reopen();
+        Mono<Void> result = shadesService.reopen();
         log.info("Finished reopen service");
-        return result;
+        return new Mono<DevicesResponse>() {
+            @Override
+            public void subscribe(CoreSubscriber<? super DevicesResponse> actual) {
+
+            }
+        };
     }
 }

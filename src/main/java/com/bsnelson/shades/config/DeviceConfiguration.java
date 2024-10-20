@@ -1,7 +1,5 @@
 package com.bsnelson.shades.config;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -16,17 +14,4 @@ import java.util.List;
 @EnableConfigurationProperties
 public class DeviceConfiguration {
     private List<Device> devices;
-
-    @Data
-    @AllArgsConstructor
-    @Valid
-    @NoArgsConstructor
-    @Builder
-    public static class Device {
-        @NotBlank
-        private String mac;
-        private String name;
-        private String seasonalDefault;
-        private List<String> groups;
-    }
 }
