@@ -11,7 +11,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ListDevicesResponse {
+public class ListDevicesResponse implements IResponse{
     String result;
     String version;
     List<Result> shades;

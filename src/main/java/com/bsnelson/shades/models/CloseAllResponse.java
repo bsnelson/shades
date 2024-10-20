@@ -11,7 +11,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CloseAllResponse {
+public class CloseAllResponse implements IResponse{
     String result;
     String version;
     String msg;

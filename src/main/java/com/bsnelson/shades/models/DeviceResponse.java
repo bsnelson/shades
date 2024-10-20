@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class DeviceResponse {
+public class DeviceResponse implements IResponse{
     String result;
     String version;
     String mac;
