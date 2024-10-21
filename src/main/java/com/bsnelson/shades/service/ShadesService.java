@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -65,25 +66,36 @@ public class ShadesService {
     }
 
     public DurableOperationResponse reopen() {
+        int retryable = retryConfiguration.getRetries();
         DurableOperationResponse durableResponse = new DurableOperationResponse();
-        durableResponse.setFailedDevices(deviceConfiguration.getDevices().stream().toList());
-        List<CompletableFuture<DeviceResponse>> futures = deviceConfiguration.getDevices().stream()
-            .map(device -> CompletableFuture.supplyAsync(() -> shadesClient.setShadePosition(device, device.getSeasonalDefault())))
-            .toList();
-        DevicesResponse response = new DevicesResponse(futures.stream()
-            .map(CompletableFuture::join) // This waits for each future to complete
-            .toList());
-        List<String> failedDevices = response.getResponses().stream()
-            .filter(deviceResponse -> "error".equals(deviceResponse.getResult()))
-            .map(devResp -> devResp.getMac())
-            .collect(Collectors.toList());
+        durableResponse.setRetries(0);
+        durableResponse.setResult("error");
+        durableResponse.setFailedDevices(deviceConfiguration.getDevices().stream().map(Device::getName).collect(Collectors.toList()));
+        while(retryable > 0 && Objects.equals(durableResponse.getResult(), "error")) {
+            List<CompletableFuture<DeviceResponse>> futures = mapNamesToDevices(durableResponse.getFailedDevices()).stream()
+                .map(device -> CompletableFuture.supplyAsync(() -> shadesClient.setShadePosition(device, device.getSeasonalDefault())))
+                .toList();
+            DevicesResponse response = new DevicesResponse(futures.stream()
+                .map(CompletableFuture::join) // This waits for each future to complete
+                .toList());
+            List<String> failedDevices = response.getResponses().stream()
+                .filter(deviceResponse -> "error".equals(deviceResponse.getResult()))
+                .map(DeviceResponse::getMac)
+                .collect(Collectors.toList());
 
-        durableResponse.setRetries(1);
-        if (failedDevices.isEmpty()) {
-            durableResponse.setResult("success");
-        } else {
-            durableResponse.setResult("failure");
-            durableResponse.setFailedDevices(mapMacsToNames(failedDevices));
+            if (failedDevices.isEmpty()) {
+                durableResponse.setResult("success");
+                durableResponse.setFailedDevices(null);
+            } else {
+                durableResponse.setResult("error");
+                durableResponse.setRetries(durableResponse.getRetries() + 1);
+                durableResponse.setFailedDevices(mapMacsToNames(failedDevices));
+                try {
+                    Thread.sleep(1000L * durableResponse.getRetries());
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
         }
         return durableResponse;
     }
@@ -96,6 +108,17 @@ public class ShadesService {
                     .findFirst()
                     .orElse(null);
                 return matchingResponse.getName();
+            })
+            .collect(Collectors.toList());
+    }
+
+    private List<Device> mapNamesToDevices(List<String> names) {
+        return names.stream()
+            .map(name -> {
+                return deviceConfiguration.getDevices().stream()
+                    .filter(response -> response.getName().equals(name))
+                    .findFirst()
+                    .orElse(null);
             })
             .collect(Collectors.toList());
     }
