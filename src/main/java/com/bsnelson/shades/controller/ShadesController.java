@@ -10,8 +10,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.http.MediaType;
-import reactor.core.CoreSubscriber;
-import reactor.core.publisher.Mono;
 
 import java.util.List;
 
@@ -38,28 +36,28 @@ public class ShadesController {
         return result;
     }
 
-//    @GetMapping(
-//            value = "/setPositions/{position}",
-//            produces = {MediaType.APPLICATION_JSON_VALUE})
-//    public Mono<DevicesResponse> setPositions(
-//            @PathVariable("position")
-//            String position) {
-//        log.debug("Entering setPositions service");
-//        Mono<DevicesResponse> result = shadesService.setPositions(position);
-//        log.debug("Finished setPositions service");
-//        return result;
-//    }
-//
-//    @GetMapping(
-//        value = "/close",
-//        produces = {MediaType.APPLICATION_JSON_VALUE})
-//    public Mono<CloseAllResponse> closeAllShades() {
-//        log.debug("Entering closeAll service");
-//        Mono<CloseAllResponse> result = shadesService.closeAllShades();
-//        log.debug("Finished closeAll service");
-//        return result;
-//    }
-//
+    @GetMapping(
+            value = "/setPositions/{position}",
+            produces = {MediaType.APPLICATION_JSON_VALUE})
+    public DevicesResponse setPositions(
+            @PathVariable("position")
+            String position) {
+        log.debug("Entering setPositions service");
+        DevicesResponse result = shadesService.setPositions(position);
+        log.debug("Finished setPositions service");
+        return result;
+    }
+
+    @GetMapping(
+        value = "/close",
+        produces = {MediaType.APPLICATION_JSON_VALUE})
+    public CloseAllResponse closeAllShades() {
+        log.debug("Entering closeAll service");
+        CloseAllResponse result = shadesService.closeAllShades();
+        log.debug("Finished closeAll service");
+        return result;
+    }
+
 //    @GetMapping(
 //        value = "/closeOld",
 //        produces = {MediaType.APPLICATION_JSON_VALUE})

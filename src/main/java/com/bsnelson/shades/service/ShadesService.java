@@ -34,15 +34,14 @@ public class ShadesService {
         return shadesClient.getDeviceList();
     }
 
-//    public Mono<CloseAllResponse> closeAllShades() {
-//        return shadesClient.closeAllShades();
-//    }
+    public CloseAllResponse closeAllShades() {
+        return shadesClient.closeAllShades();
+    }
 
     public DevicesResponse getStates() {
         List<CompletableFuture<DeviceResponse>> futures = deviceConfiguration.getDevices().stream()
                 .map(device -> CompletableFuture.supplyAsync(() -> shadesClient.getShadeState(device)))
                 .toList();
-
         DevicesResponse response = new DevicesResponse(futures.stream()
             .map(CompletableFuture::join) // This waits for each future to complete
             .toList());
@@ -50,27 +49,17 @@ public class ShadesService {
         return response;
     }
 
-//    private <T> List<IResponse> callClients(List<String> paths, Class<T> clazz) {
-//        final ExecutorService executorService = Executors.newFixedThreadPool(paths.size());
-//        List<CompletableFuture<IResponse>> futures = paths.stream()
-//            .map(url -> CompletableFuture.supplyAsync(() -> callClient(url, clazz), executorService))
-//            .toList();
-//
-//        return futures.stream()
-//            .map(CompletableFuture::join) // This waits for each future to complete
-//            .toList();
-//    }
-//
-//    public Mono<DevicesResponse> setPositions(String position) {
-//        // Create a list of Monos dynamically from the device list
-//        List<Mono<DeviceResponse>> shadeMonos = deviceConfiguration.getDevices().stream()
-//                .map(device -> shadesClient.setShadePosition(device.getMac(), position)
-//                        .subscribeOn(Schedulers.boundedElastic())
-//                        .onErrorComplete())
-//                .toList();
-//        return getMonos(shadeMonos);
-//    }
-//
+    public DevicesResponse setPositions(String position) {
+        List<CompletableFuture<DeviceResponse>> futures = deviceConfiguration.getDevices().stream()
+            .map(device -> CompletableFuture.supplyAsync(() -> shadesClient.setShadePosition(device, position)))
+            .toList();
+        DevicesResponse response = new DevicesResponse(futures.stream()
+            .map(CompletableFuture::join) // This waits for each future to complete
+            .toList());
+        log.info("Response is: " + response);
+        return response;
+    }
+
 //    public Mono<DevicesResponse> openSeasonal() {
 //        // Create a list of Monos dynamically from the device list
 //        List<Mono<DeviceResponse>> shadeMonos = deviceConfiguration.getDevices().stream()
