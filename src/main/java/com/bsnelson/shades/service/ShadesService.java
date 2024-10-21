@@ -9,17 +9,10 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @AllArgsConstructor
 @Service
@@ -60,16 +53,53 @@ public class ShadesService {
         return response;
     }
 
-//    public Mono<DevicesResponse> openSeasonal() {
-//        // Create a list of Monos dynamically from the device list
-//        List<Mono<DeviceResponse>> shadeMonos = deviceConfiguration.getDevices().stream()
-//                .map(device -> shadesClient.setShadePosition(device.getMac(), device.getSeasonalDefault())
-//                        .subscribeOn(Schedulers.boundedElastic())
-//                        .onErrorComplete())
-//                .toList();
-//        return getMonos(shadeMonos);
-//    }
-//
+    public DevicesResponse openSeasonal() {
+        List<CompletableFuture<DeviceResponse>> futures = deviceConfiguration.getDevices().stream()
+            .map(device -> CompletableFuture.supplyAsync(() -> shadesClient.setShadePosition(device, device.getSeasonalDefault())))
+            .toList();
+        DevicesResponse response = new DevicesResponse(futures.stream()
+            .map(CompletableFuture::join) // This waits for each future to complete
+            .toList());
+        log.info("Response is: " + response);
+        return response;
+    }
+
+    public DurableOperationResponse reopen() {
+        DurableOperationResponse durableResponse = new DurableOperationResponse();
+        durableResponse.setFailedDevices(deviceConfiguration.getDevices().stream().toList());
+        List<CompletableFuture<DeviceResponse>> futures = deviceConfiguration.getDevices().stream()
+            .map(device -> CompletableFuture.supplyAsync(() -> shadesClient.setShadePosition(device, device.getSeasonalDefault())))
+            .toList();
+        DevicesResponse response = new DevicesResponse(futures.stream()
+            .map(CompletableFuture::join) // This waits for each future to complete
+            .toList());
+        List<String> failedDevices = response.getResponses().stream()
+            .filter(deviceResponse -> "error".equals(deviceResponse.getResult()))
+            .map(devResp -> devResp.getMac())
+            .collect(Collectors.toList());
+
+        durableResponse.setRetries(1);
+        if (failedDevices.isEmpty()) {
+            durableResponse.setResult("success");
+        } else {
+            durableResponse.setResult("failure");
+            durableResponse.setFailedDevices(mapMacsToNames(failedDevices));
+        }
+        return durableResponse;
+    }
+
+    private List<String> mapMacsToNames(List<String> failedMacs) {
+        return failedMacs.stream()
+            .map(mac -> {
+                Device matchingResponse = deviceConfiguration.getDevices().stream()
+                    .filter(response -> response.getMac().equals(mac))
+                    .findFirst()
+                    .orElse(null);
+                return matchingResponse.getName();
+            })
+            .collect(Collectors.toList());
+    }
+
 //    public Mono<Void> reopen() {
 //        // Create a list of Monos dynamically from the device list
 //        int remainingRetries = 0;

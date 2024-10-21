@@ -2,6 +2,7 @@ package com.bsnelson.shades.controller;
 
 import com.bsnelson.shades.models.CloseAllResponse;
 import com.bsnelson.shades.models.DevicesResponse;
+import com.bsnelson.shades.models.DurableOperationResponse;
 import com.bsnelson.shades.models.ListDevicesResponse;
 import com.bsnelson.shades.service.ShadesService;
 import lombok.AllArgsConstructor;
@@ -58,38 +59,33 @@ public class ShadesController {
         return result;
     }
 
-//    @GetMapping(
-//        value = "/closeOld",
-//        produces = {MediaType.APPLICATION_JSON_VALUE})
-//    public Mono<DevicesResponse> close() {
-//        log.debug("Entering close service");
-//        Mono<DevicesResponse> result = shadesService.setPositions("100");
-//        log.debug("Finished close service");
-//        return result;
-//    }
-//
-//    @GetMapping(
-//            value = "/openSeasonal",
-//            produces = {MediaType.APPLICATION_JSON_VALUE})
-//    public Mono<DevicesResponse> openSeasonal() {
-//        log.debug("Entering openSeasonal service");
-//        Mono<DevicesResponse> result = shadesService.openSeasonal();
-//        log.debug("Finished openSeasonal service");
-//        return result;
-//    }
-//
-//    @GetMapping(
-//        value = "/reopen",
-//        produces = {MediaType.APPLICATION_JSON_VALUE})
-//    public Mono<DevicesResponse> reopen() {
-//        log.info("Entering reopen service");
-//        Mono<Void> result = shadesService.reopen();
-//        log.info("Finished reopen service");
-//        return new Mono<DevicesResponse>() {
-//            @Override
-//            public void subscribe(CoreSubscriber<? super DevicesResponse> actual) {
-//
-//            }
-//        };
-//    }
+    @GetMapping(
+        value = "/closeOld",
+        produces = {MediaType.APPLICATION_JSON_VALUE})
+    public DevicesResponse close() {
+        log.debug("Entering close service");
+        DevicesResponse result = shadesService.setPositions("100");
+        log.debug("Finished close service");
+        return result;
+    }
+
+    @GetMapping(
+            value = "/openSeasonal",
+            produces = {MediaType.APPLICATION_JSON_VALUE})
+    public DevicesResponse openSeasonal() {
+        log.debug("Entering openSeasonal service");
+        DevicesResponse result = shadesService.openSeasonal();
+        log.debug("Finished openSeasonal service");
+        return result;
+    }
+
+    @GetMapping(
+        value = "/reopen",
+        produces = {MediaType.APPLICATION_JSON_VALUE})
+    public DurableOperationResponse reopen() {
+        log.info("Entering reopen service");
+        DurableOperationResponse result = shadesService.reopen();
+        log.info("Finished reopen service");
+        return result;
+    }
 }
