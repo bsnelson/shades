@@ -30,9 +30,9 @@ public class ShadesService {
     private final DeviceConfiguration deviceConfiguration;
     private final RetryConfiguration retryConfiguration;
 
-//    public ListDevicesResponse getList() {
-//        return shadesClient.getDeviceList();
-//    }
+    public ListDevicesResponse getList() {
+        return shadesClient.getDeviceList();
+    }
 
 //    public Mono<CloseAllResponse> closeAllShades() {
 //        return shadesClient.closeAllShades();

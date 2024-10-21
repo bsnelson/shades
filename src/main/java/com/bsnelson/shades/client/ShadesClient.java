@@ -31,17 +31,15 @@ public class ShadesClient {
     private WebClient shadesWebClient;
     private ApiConfiguration apiConfiguration;
 
-//    public ListDevicesResponse getDeviceList() {
-//        return shadesWebClient
-//                .get()
-//                .uri(
-//                        uriBuilder ->
-//                                uriBuilder
-//                                        .path(apiConfiguration.getListDevices().getPath())
-//                                        .build())
-//                .retrieve()
-//                .bodyToMono(ListDevicesResponse.class);
-//    }
+    public ListDevicesResponse getDeviceList() {
+        log.debug("In listDevices");
+        String uri = UriComponentsBuilder.fromUriString(apiConfiguration.getConnectIpAddress())
+            .path(apiConfiguration.getListDevices().getPath())
+            .build()
+            //  .buildAndExpand(URLEncoder.encode(device.getMac(), StandardCharsets.UTF_8))
+            .toString();
+        return (ListDevicesResponse) callClient(uri, ListDevicesResponse.class);
+    }
 //
 //    public Mono<CloseAllResponse> closeAllShades() {
 //        return shadesWebClient

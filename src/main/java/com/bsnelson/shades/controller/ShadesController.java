@@ -21,13 +21,13 @@ import java.util.List;
 public class ShadesController {
     private ShadesService shadesService;
 
-//    @GetMapping(
-//        value = "/listDevices",
-//        produces = {MediaType.APPLICATION_JSON_VALUE})
-//    public ListDevicesResponse listDevices() {
-//        return shadesService.getList();
-//    }
-//
+    @GetMapping(
+        value = "/listDevices",
+        produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ListDevicesResponse listDevices() {
+        return shadesService.getList();
+    }
+
     @GetMapping(
             value = "/getStates",
             produces = {MediaType.APPLICATION_JSON_VALUE})
