@@ -83,9 +83,18 @@ public class ShadesController {
         value = "/reopen",
         produces = {MediaType.APPLICATION_JSON_VALUE})
     public DurableOperationResponse reopen() {
-        log.info("Entering reopen service");
+        log.debug("Entering reopen service");
         DurableOperationResponse result = shadesService.reopen();
-        log.info("Finished reopen service");
+        log.debug("Finished reopen service");
+        return result;
+    }
+    @GetMapping(
+        value = "/reclose",
+        produces = {MediaType.APPLICATION_JSON_VALUE})
+    public DurableOperationResponse reclose() {
+        log.debug("Entering reclose service");
+        DurableOperationResponse result = shadesService.reclose();
+        log.debug("Finished reclose service");
         return result;
     }
 }
