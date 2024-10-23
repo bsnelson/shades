@@ -75,12 +75,12 @@ public class ShadesService {
     }
     
     public DurableOperationResponse durablePosition(boolean useSeasonal, String position) {
-        int retryable = retryConfiguration.getRetries();
+        int retriable = retryConfiguration.getRetries();
         DurableOperationResponse durableResponse = new DurableOperationResponse();
         durableResponse.setRetries(0);
         durableResponse.setResult(ERROR);
         durableResponse.setFailedDevices(deviceConfiguration.getDevices().stream().map(Device::getName).collect(Collectors.toList()));
-        while(retryable > 0 && Objects.equals(durableResponse.getResult(), ERROR)) {
+        while(retriable >= 0 && Objects.equals(durableResponse.getResult(), ERROR)) {
             List<CompletableFuture<DeviceResponse>> futures = mapNamesToDevices(durableResponse.getFailedDevices()).stream()
                 .map(device -> CompletableFuture.supplyAsync(() -> shadesClient.setShadePosition(device, (useSeasonal ? device.getSeasonalDefault() : position))))
                 .toList();
@@ -97,12 +97,16 @@ public class ShadesService {
                 durableResponse.setFailedDevices(null);
             } else {
                 durableResponse.setResult(ERROR);
-                durableResponse.setRetries(durableResponse.getRetries() + 1);
                 durableResponse.setFailedDevices(mapMacsToNames(failedDevices));
-                try {
-                    Thread.sleep(1000L * durableResponse.getRetries());
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
+                log.info("Failed, retries {}, retriable {}", retryConfiguration.getRetries(), retriable);
+                if (--retriable >=
+                        0) {
+                    durableResponse.setRetries(durableResponse.getRetries() + 1);
+                    try {
+                        Thread.sleep(1000L * durableResponse.getRetries());
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             }
         }
