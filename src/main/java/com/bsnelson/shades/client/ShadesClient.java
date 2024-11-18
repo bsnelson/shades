@@ -2,9 +2,11 @@ package com.bsnelson.shades.client;
 
 import com.bsnelson.shades.config.ApiConfiguration;
 import com.bsnelson.shades.config.Device;
+import com.bsnelson.shades.exception.RestTemplateResponseErrorHandler;
 import com.bsnelson.shades.models.*;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -54,7 +56,10 @@ public class ShadesClient {
     }
 
     private <T> IResponse callClient(String url, Class<T> clazz) {
-        final RestTemplate restTemplate = new RestTemplate();
+        RestTemplateBuilder restTemplateBuilder = new RestTemplateBuilder();
+        final RestTemplate restTemplate = restTemplateBuilder
+                .errorHandler(new RestTemplateResponseErrorHandler())
+                .build();
         return (IResponse) restTemplate.getForObject(url, clazz);
     }
 }
