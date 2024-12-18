@@ -1,6 +1,6 @@
 package com.bsnelson.shades.service;
 
-import com.bsnelson.shades.client.ShadesClient;
+import com.bsnelson.shades.client.SomaShadesClient;
 import com.bsnelson.shades.config.Device;
 import com.bsnelson.shades.config.DeviceConfiguration;
 import com.bsnelson.shades.config.RetryConfiguration;
@@ -21,21 +21,21 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ShadesService {
     public static final String ERROR = "error";
-    private final ShadesClient shadesClient;
+    private final SomaShadesClient somaShadesClient;
     private final DeviceConfiguration deviceConfiguration;
     private final RetryConfiguration retryConfiguration;
 
     public ListDevicesResponse getList() {
-        return shadesClient.getDeviceList();
+        return somaShadesClient.getDeviceList();
     }
 
     public CloseAllResponse closeAllShades() {
-        return shadesClient.closeAllShades();
+        return somaShadesClient.closeAllShades();
     }
 
     public DevicesResponse getStates() {
         List<CompletableFuture<DeviceResponse>> futures = deviceConfiguration.getDevices().stream()
-                .map(device -> CompletableFuture.supplyAsync(() -> shadesClient.getShadeState(device)))
+                .map(device -> CompletableFuture.supplyAsync(() -> somaShadesClient.getShadeState(device)))
                 .toList();
         DevicesResponse response = new DevicesResponse(futures.stream()
             .map(CompletableFuture::join) // This waits for each future to complete
@@ -46,7 +46,7 @@ public class ShadesService {
 
     public DevicesResponse setPositions(String position) {
         List<CompletableFuture<DeviceResponse>> futures = deviceConfiguration.getDevices().stream()
-            .map(device -> CompletableFuture.supplyAsync(() -> shadesClient.setShadePosition(device, position)))
+            .map(device -> CompletableFuture.supplyAsync(() -> somaShadesClient.setShadePosition(device, position)))
             .toList();
         DevicesResponse response = new DevicesResponse(futures.stream()
             .map(CompletableFuture::join) // This waits for each future to complete
@@ -57,7 +57,7 @@ public class ShadesService {
 
     public DevicesResponse openSeasonal() {
         List<CompletableFuture<DeviceResponse>> futures = deviceConfiguration.getDevices().stream()
-            .map(device -> CompletableFuture.supplyAsync(() -> shadesClient.setShadePosition(device, device.getSeasonalDefault())))
+            .map(device -> CompletableFuture.supplyAsync(() -> somaShadesClient.setShadePosition(device, device.getSeasonalDefault())))
             .toList();
         DevicesResponse response = new DevicesResponse(futures.stream()
             .map(CompletableFuture::join) // This waits for each future to complete
@@ -82,7 +82,7 @@ public class ShadesService {
         durableResponse.setFailedDevices(deviceConfiguration.getDevices().stream().map(Device::getName).collect(Collectors.toList()));
         while(retriable >= 0 && Objects.equals(durableResponse.getResult(), ERROR)) {
             List<CompletableFuture<DeviceResponse>> futures = mapNamesToDevices(durableResponse.getFailedDevices()).stream()
-                .map(device -> CompletableFuture.supplyAsync(() -> shadesClient.setShadePosition(device, (useSeasonal ? device.getSeasonalDefault() : position))))
+                .map(device -> CompletableFuture.supplyAsync(() -> somaShadesClient.setShadePosition(device, (useSeasonal ? device.getSeasonalDefault() : position))))
                 .toList();
             DevicesResponse response = new DevicesResponse(futures.stream()
                 .map(CompletableFuture::join) // This waits for each future to complete

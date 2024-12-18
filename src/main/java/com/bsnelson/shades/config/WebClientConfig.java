@@ -35,7 +35,7 @@ public class WebClientConfig {
     public WebClient shadesWebClient() {
         return webClientBuilder
                 .clone()
-                .baseUrl(apiConfiguration.getConnectIpAddress())
+                .baseUrl(apiConfiguration.getSomaConnectIpAddress())
                 .build();
     }
 }

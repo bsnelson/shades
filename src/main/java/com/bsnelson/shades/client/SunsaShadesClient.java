@@ -1,7 +1,7 @@
 package com.bsnelson.shades.client;
 
-import com.bsnelson.shades.config.ApiConfiguration;
 import com.bsnelson.shades.config.Device;
+import com.bsnelson.shades.config.SunsaConfiguration;
 import com.bsnelson.shades.exception.RestTemplateResponseErrorHandler;
 import com.bsnelson.shades.models.*;
 import lombok.AllArgsConstructor;
@@ -15,43 +15,25 @@ import org.springframework.web.util.UriComponentsBuilder;
 @AllArgsConstructor
 @Component
 @Slf4j
-public class ShadesClient {
+public class SunsaShadesClient {
     private WebClient shadesWebClient;
-    private ApiConfiguration apiConfiguration;
+    private SunsaConfiguration sunsaConfiguration;
 
     public ListDevicesResponse getDeviceList() {
         log.debug("In listDevices");
-        String uri = UriComponentsBuilder.fromUriString(apiConfiguration.getConnectIpAddress())
-            .path(apiConfiguration.getListDevices().getPath())
-            .build()
-            .toString();
+        String uri = UriComponentsBuilder.fromUriString(sunsaConfiguration.getSunsaBaseUrl())
+                .path(sunsaConfiguration.getListDevices().getPath())
+                .build()
+                .toString();
         return (ListDevicesResponse) callClient(uri, ListDevicesResponse.class);
-    }
-
-    public CloseAllResponse closeAllShades() {
-        log.debug("In closeAll");
-        String uri = UriComponentsBuilder.fromUriString(apiConfiguration.getConnectIpAddress())
-            .path(apiConfiguration.getCloseAllShades().getPath())
-            .build()
-            .toString();
-        return (CloseAllResponse) callClient(uri, CloseAllResponse.class);
-    }
-
-    public DeviceResponse getShadeState(Device device) {
-        log.debug("In getStates");
-        String uri = UriComponentsBuilder.fromUriString(apiConfiguration.getConnectIpAddress())
-            .path(apiConfiguration.getGetShadeState().getPath())
-            .buildAndExpand(device.getMac())
-            .toString();
-        return (DeviceResponse) callClient(uri, DeviceResponse.class);
     }
 
     public DeviceResponse setShadePosition(Device device, String position) {
         log.debug("In setPosition");
-        String uri = UriComponentsBuilder.fromUriString(apiConfiguration.getConnectIpAddress())
-            .path(apiConfiguration.getSetShadePosition().getPath())
-            .buildAndExpand(device.getMac(), position)
-            .toString();
+        String uri = UriComponentsBuilder.fromUriString(sunsaConfiguration.getSunsaBaseUrl())
+                .path(sunsaConfiguration.getSetShadePosition().getPath())
+                .buildAndExpand(device.getMac(), position)
+                .toString();
         return (DeviceResponse) callClient(uri, DeviceResponse.class);
     }
 

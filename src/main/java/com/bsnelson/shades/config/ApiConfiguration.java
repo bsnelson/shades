@@ -9,33 +9,11 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.MultiValueMap;
 
+@Getter
 @Configuration
 @Data
 @NoArgsConstructor
-@ConfigurationProperties("downstream.api.shade")
-@EnableConfigurationProperties
 public class ApiConfiguration {
-    private ApiEndpoint listDevices;
-    private ApiEndpoint getShadeState;
-    private ApiEndpoint setShadePosition;
-    private ApiEndpoint closeAllShades;
-
-    @Getter
-    @Value("${downstream.connectIp}")
-    private String connectIpAddress;
-
-    @Getter
     @Value("${downstream.retries}")
     private String retries;
-
-    @Data
-    @AllArgsConstructor
-    @Valid
-    @NoArgsConstructor
-    @Builder
-    public static class ApiEndpoint {
-        @NotBlank
-        private String path;
-        private MultiValueMap<String, String> queryParams;
-    }
 }

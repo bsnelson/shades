@@ -8,9 +8,10 @@ logging:
     ROOT: DEBUG
 
 downstream:
-  # connectIp: http://192.168.1.30:3000
-  connectIp: http://192.168.1.13:3000 # intentional bad IP address
-  # connectIp: http://localhost:8083
+  # somaConnectIp: http://192.168.1.30:3000
+  somaConnectIp: http://192.168.1.13:3000 # intentional bad IP address
+  # somaConnectIp: http://localhost:8083
+  sunsaBaseUrl: https://sunsahomes.com/api/public
   retries: 2
   api:
     shade:
