@@ -1,6 +1,7 @@
 package com.bsnelson.shades.service;
 
 import com.bsnelson.shades.client.SomaShadesClient;
+import com.bsnelson.shades.client.SunsaShadesClient;
 import com.bsnelson.shades.config.Device;
 import com.bsnelson.shades.config.DeviceConfiguration;
 import com.bsnelson.shades.config.RetryConfiguration;
@@ -13,7 +14,8 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 @AllArgsConstructor
 @Service
@@ -22,6 +24,7 @@ import java.util.stream.Collectors;
 public class ShadesService {
     public static final String ERROR = "error";
     private final SomaShadesClient somaShadesClient;
+    private final SunsaShadesClient sunsaShadesClient;
     private final DeviceConfiguration deviceConfiguration;
     private final RetryConfiguration retryConfiguration;
 
@@ -34,7 +37,7 @@ public class ShadesService {
     }
 
     public DevicesResponse getStates() {
-        List<CompletableFuture<DeviceResponse>> futures = deviceConfiguration.getDevices().stream()
+        List<CompletableFuture<SomaDeviceResponse>> futures = deviceConfiguration.getDevices().stream()
                 .map(device -> CompletableFuture.supplyAsync(() -> somaShadesClient.getShadeState(device)))
                 .toList();
         DevicesResponse response = new DevicesResponse(futures.stream()
@@ -45,7 +48,7 @@ public class ShadesService {
     }
 
     public DevicesResponse setPositions(String position) {
-        List<CompletableFuture<DeviceResponse>> futures = deviceConfiguration.getDevices().stream()
+        List<CompletableFuture<SomaDeviceResponse>> futures = deviceConfiguration.getDevices().stream()
             .map(device -> CompletableFuture.supplyAsync(() -> somaShadesClient.setShadePosition(device, position)))
             .toList();
         DevicesResponse response = new DevicesResponse(futures.stream()
@@ -56,7 +59,7 @@ public class ShadesService {
     }
 
     public DevicesResponse openSeasonal() {
-        List<CompletableFuture<DeviceResponse>> futures = deviceConfiguration.getDevices().stream()
+        List<CompletableFuture<SomaDeviceResponse>> futures = deviceConfiguration.getDevices().stream()
             .map(device -> CompletableFuture.supplyAsync(() -> somaShadesClient.setShadePosition(device, device.getSeasonalDefault())))
             .toList();
         DevicesResponse response = new DevicesResponse(futures.stream()
@@ -79,25 +82,30 @@ public class ShadesService {
         DurableOperationResponse durableResponse = new DurableOperationResponse();
         durableResponse.setRetries(0);
         durableResponse.setResult(ERROR);
-        durableResponse.setFailedDevices(deviceConfiguration.getDevices().stream().map(Device::getName).collect(Collectors.toList()));
+        durableResponse.setFailedDevices(deviceConfiguration.getDevices().stream().map(Device::getName).collect(toList()));
         while(retriable >= 0 && Objects.equals(durableResponse.getResult(), ERROR)) {
-            List<CompletableFuture<DeviceResponse>> futures = mapNamesToDevices(durableResponse.getFailedDevices()).stream()
-                .map(device -> CompletableFuture.supplyAsync(() -> somaShadesClient.setShadePosition(device, (useSeasonal ? device.getSeasonalDefault() : position))))
+            List<CompletableFuture<IResponse>> futures = mapNamesToDevices(durableResponse.getFailedDevices()).stream()
+                .map(device -> CompletableFuture.supplyAsync(() -> {
+                    if (device.getType().equals("sunsa")) {
+                        return sunsaShadesClient.setShadePosition(device, (useSeasonal ? device.getSeasonalDefault() : position);
+                    } else if (device.getType().equals("soma")) {
+                        return somaShadesClient.setShadePosition(device, (useSeasonal ? device.getSeasonalDefault() : position);
+                    }})
                 .toList();
             DevicesResponse response = new DevicesResponse(futures.stream()
                 .map(CompletableFuture::join) // This waits for each future to complete
                 .toList());
             List<String> failedDevices = response.getResponses().stream()
-                .filter(deviceResponse -> ERROR.equals(deviceResponse.getResult()))
-                .map(DeviceResponse::getMac)
-                .collect(Collectors.toList());
+                .filter(somaDeviceResponse -> ERROR.equals(somaDeviceResponse.getResult()))
+                .map(SomaDeviceResponse::getId)
+                .collect(toList());
 
             if (failedDevices.isEmpty()) {
                 durableResponse.setResult("success");
                 durableResponse.setFailedDevices(null);
             } else {
                 durableResponse.setResult(ERROR);
-                durableResponse.setFailedDevices(mapMacsToNames(failedDevices));
+                durableResponse.setFailedDevices(mapIdsToNames(failedDevices));
                 log.info("Failed, retries {}, retriable {}", retryConfiguration.getRetries(), retriable);
                 if (--retriable >=
                         0) {
@@ -113,16 +121,16 @@ public class ShadesService {
         return durableResponse;
     }
 
-    private List<String> mapMacsToNames(List<String> failedMacs) {
-        return failedMacs.stream()
-            .map(mac -> {
+    private List<String> mapIdsToNames(List<String> failedIds) {
+        return failedIds.stream()
+            .map(id -> {
                 Device matchingResponse = deviceConfiguration.getDevices().stream()
-                    .filter(response -> response.getMac().equals(mac))
+                    .filter(response -> response.getId().equals(id))
                     .findFirst()
                     .orElse(null);
                 return matchingResponse.getName();
             })
-            .collect(Collectors.toList());
+            .collect(toList());
     }
 
     private List<Device> mapNamesToDevices(List<String> names) {
@@ -131,6 +139,6 @@ public class ShadesService {
                 .filter(response -> response.getName().equals(name))
                 .findFirst()
                 .orElse(null))
-            .collect(Collectors.toList());
+            .collect(toList());
     }
 }

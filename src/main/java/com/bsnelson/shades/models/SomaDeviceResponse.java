@@ -5,12 +5,14 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class DevicesResponse {
-    List<SomaDeviceResponse> responses;
+public class SomaDeviceResponse implements IResponse{
+    String result;
+    String version;
+    String id;
+    String position;
+    Boolean closed_upwards;
 }

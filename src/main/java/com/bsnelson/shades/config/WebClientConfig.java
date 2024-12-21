@@ -13,14 +13,14 @@ import java.time.Duration;
 @Configuration
 public class WebClientConfig {
     private final WebClient.Builder webClientBuilder;
-    private final ApiConfiguration apiConfiguration;
+    private final SomaConfiguration somaConfiguration;
 
     WebClientConfig(
             WebClient.Builder webClientBuilder,
-            ApiConfiguration apiConfiguration
+            SomaConfiguration somaConfiguration
     ) {
         this.webClientBuilder = webClientBuilder;
-        this.apiConfiguration = apiConfiguration;
+        this.somaConfiguration = somaConfiguration;
         var provider =
                 ConnectionProvider.builder("shadeConnectionClient")
                         .maxConnections(20)
@@ -35,7 +35,7 @@ public class WebClientConfig {
     public WebClient shadesWebClient() {
         return webClientBuilder
                 .clone()
-                .baseUrl(apiConfiguration.getSomaConnectIpAddress())
+                .baseUrl(somaConfiguration.getConnectIpAddress())
                 .build();
     }
 }

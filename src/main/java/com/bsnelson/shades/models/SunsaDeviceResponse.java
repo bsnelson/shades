@@ -9,10 +9,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class DeviceResponse implements IResponse{
-    String result;
-    String version;
-    String mac;
+public class SunsaDeviceResponse implements IResponse{
+    String idDevice;
+    String name;
     String position;
-    Boolean closed_upwards;
+    String apiUrl;
 }

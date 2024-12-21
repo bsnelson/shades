@@ -13,16 +13,19 @@ import org.springframework.util.MultiValueMap;
 @Configuration
 @Data
 @NoArgsConstructor
-@ConfigurationProperties("downstream.api.sunsaShade")
+@ConfigurationProperties("downstream.api.sunsa")
 @EnableConfigurationProperties
 public class SunsaConfiguration {
     private ApiEndpoint listDevices;
-    private ApiEndpoint putDevice;
-    private ApiEndpoint closeAllShades;
+    private ApiEndpoint setShadePosition;
 
     @Getter
-    @Value("${downstream.sunsaBaseUrl}")
+    @Value("${downstream.sunsa.baseUrl}")
     private String sunsaBaseUrl;
+
+    @Getter
+    @Value("${downstream.sunsa.apiKey}")
+    private String apiKey;
 
     @Data
     @AllArgsConstructor

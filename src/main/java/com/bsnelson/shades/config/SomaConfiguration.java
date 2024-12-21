@@ -13,7 +13,7 @@ import org.springframework.util.MultiValueMap;
 @Configuration
 @Data
 @NoArgsConstructor
-@ConfigurationProperties("downstream.api.somaShade")
+@ConfigurationProperties("downstream.api.soma")
 @EnableConfigurationProperties
 public class SomaConfiguration {
     private ApiEndpoint listDevices;
@@ -22,8 +22,8 @@ public class SomaConfiguration {
     private ApiEndpoint closeAllShades;
 
     @Getter
-    @Value("${downstream.somaConnectIp}")
-    private String somaConnectIpAddress;
+    @Value("${downstream.soma.connectIp}")
+    private String connectIpAddress;
 
     @Data
     @AllArgsConstructor

@@ -16,7 +16,8 @@ import java.util.List;
 @Builder
 public class Device {
     @NotBlank
-    private String mac;
+    private String id;
+    private String type;
     private String name;
     private String seasonalDefault;
     private List<String> groups;

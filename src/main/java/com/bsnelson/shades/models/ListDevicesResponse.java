@@ -18,7 +18,7 @@ public class ListDevicesResponse implements IResponse{
     @Data
     public static class Result {
         String name;
-        String mac;
+        String id;
         String type;
         String gen;
     }

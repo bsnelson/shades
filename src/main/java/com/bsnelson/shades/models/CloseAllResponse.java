@@ -18,7 +18,7 @@ public class CloseAllResponse implements IResponse{
     List<Result> results;
     @Data
     public static class Result {
-        String mac;
+        String id;
         String name;
         String result;
         List<String> errors;

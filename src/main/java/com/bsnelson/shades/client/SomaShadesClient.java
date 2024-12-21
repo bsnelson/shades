@@ -21,7 +21,7 @@ public class SomaShadesClient {
 
     public ListDevicesResponse getDeviceList() {
         log.debug("In listDevices");
-        String uri = UriComponentsBuilder.fromUriString(somaConfiguration.getSomaConnectIpAddress())
+        String uri = UriComponentsBuilder.fromUriString(somaConfiguration.getConnectIpAddress())
             .path(somaConfiguration.getListDevices().getPath())
             .build()
             .toString();
@@ -30,29 +30,29 @@ public class SomaShadesClient {
 
     public CloseAllResponse closeAllShades() {
         log.debug("In closeAll");
-        String uri = UriComponentsBuilder.fromUriString(somaConfiguration.getSomaConnectIpAddress())
+        String uri = UriComponentsBuilder.fromUriString(somaConfiguration.getConnectIpAddress())
             .path(somaConfiguration.getCloseAllShades().getPath())
             .build()
             .toString();
         return (CloseAllResponse) callClient(uri, CloseAllResponse.class);
     }
 
-    public DeviceResponse getShadeState(Device device) {
+    public SomaDeviceResponse getShadeState(Device device) {
         log.debug("In getStates");
-        String uri = UriComponentsBuilder.fromUriString(somaConfiguration.getSomaConnectIpAddress())
+        String uri = UriComponentsBuilder.fromUriString(somaConfiguration.getConnectIpAddress())
             .path(somaConfiguration.getGetShadeState().getPath())
-            .buildAndExpand(device.getMac())
+            .buildAndExpand(device.getId())
             .toString();
-        return (DeviceResponse) callClient(uri, DeviceResponse.class);
+        return (SomaDeviceResponse) callClient(uri, SomaDeviceResponse.class);
     }
 
-    public DeviceResponse setShadePosition(Device device, String position) {
+    public SomaDeviceResponse setShadePosition(Device device, String position) {
         log.debug("In setPosition");
-        String uri = UriComponentsBuilder.fromUriString(somaConfiguration.getSomaConnectIpAddress())
+        String uri = UriComponentsBuilder.fromUriString(somaConfiguration.getConnectIpAddress())
             .path(somaConfiguration.getSetShadePosition().getPath())
-            .buildAndExpand(device.getMac(), position)
+            .buildAndExpand(device.getId(), position)
             .toString();
-        return (DeviceResponse) callClient(uri, DeviceResponse.class);
+        return (SomaDeviceResponse) callClient(uri, SomaDeviceResponse.class);
     }
 
     private <T> IResponse callClient(String url, Class<T> clazz) {
