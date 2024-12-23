@@ -37,7 +37,7 @@ public class ShadesService {
     }
 
     public DevicesResponse getStates() {
-        List<CompletableFuture<SomaDeviceResponse>> futures = deviceConfiguration.getDevices().stream()
+        List<CompletableFuture<IResponse>> futures = deviceConfiguration.getDevices().stream()
                 .map(device -> CompletableFuture.supplyAsync(() -> somaShadesClient.getShadeState(device)))
                 .toList();
         DevicesResponse response = new DevicesResponse(futures.stream()
@@ -87,17 +87,34 @@ public class ShadesService {
             List<CompletableFuture<IResponse>> futures = mapNamesToDevices(durableResponse.getFailedDevices()).stream()
                 .map(device -> CompletableFuture.supplyAsync(() -> {
                     if (device.getType().equals("sunsa")) {
-                        return sunsaShadesClient.setShadePosition(device, (useSeasonal ? device.getSeasonalDefault() : position);
+                        return sunsaShadesClient.setShadePosition(device, (useSeasonal ? device.getSeasonalDefault() : position));
                     } else if (device.getType().equals("soma")) {
-                        return somaShadesClient.setShadePosition(device, (useSeasonal ? device.getSeasonalDefault() : position);
-                    }})
+                        return somaShadesClient.setShadePosition(device, (useSeasonal ? device.getSeasonalDefault() : position));
+                    }
+                    return null;
+                }))
                 .toList();
             DevicesResponse response = new DevicesResponse(futures.stream()
                 .map(CompletableFuture::join) // This waits for each future to complete
                 .toList());
             List<String> failedDevices = response.getResponses().stream()
-                .filter(somaDeviceResponse -> ERROR.equals(somaDeviceResponse.getResult()))
-                .map(SomaDeviceResponse::getId)
+                .filter(deviceResponse -> {
+                        // Check the type and process accordingly
+                        if (deviceResponse instanceof SomaDeviceResponse somaResponse) {
+                            return ERROR.equals(somaResponse.getResult());
+                        } else if (deviceResponse instanceof SunsaDeviceResponse sunsaResponse) {
+                            return sunsaResponse.getPosition().equals(position));
+                        }
+                        return false; // Unknown type, exclude it
+                    })
+                .map(deviceResponse -> {
+                    if (deviceResponse instanceof SomaDeviceResponse somaResponse) {
+                        return somaResponse.getId();
+                    } else if (deviceResponse instanceof SunsaDeviceResponse sunsaResponse) {
+                        return sunsaResponse.getIdDevice();
+                    }
+                    return null;
+                })
                 .collect(toList());
 
             if (failedDevices.isEmpty()) {

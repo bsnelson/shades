@@ -12,5 +12,5 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class DevicesResponse {
-    List<SomaDeviceResponse> responses;
+    List<IResponse> responses;
 }
