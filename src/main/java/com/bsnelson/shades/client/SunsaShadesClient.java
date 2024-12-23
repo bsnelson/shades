@@ -16,6 +16,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.util.Optional;
+
 @AllArgsConstructor
 @Component
 @Slf4j
@@ -23,13 +25,27 @@ public class SunsaShadesClient {
     private WebClient shadesWebClient;
     private SunsaConfiguration sunsaConfiguration;
 
-    public ListDevicesResponse getDeviceList() {
+    public SunsaDevicesResponse getDeviceList() {
         log.debug("In listDevices");
         String uri = UriComponentsBuilder.fromUriString(sunsaConfiguration.getSunsaBaseUrl())
                 .path(sunsaConfiguration.getListDevices().getPath())
                 .build()
                 .toString();
-        return (ListDevicesResponse) clientGet(uri, ListDevicesResponse.class);
+        return (SunsaDevicesResponse) clientGet(uri, SunsaDevicesResponse.class);
+    }
+
+    public SunsaDeviceResponse getShadeState(Device device) {
+        log.debug("In getShadeState");
+        SunsaDevicesResponse devicesResponse = this.getDeviceList();
+        Optional<SunsaDevicesResponse.Result> match = devicesResponse.getDevices().stream()
+                .filter(sunsaDeviceResponse -> sunsaDeviceResponse.getIdDevice().toString().equals(device.getId()))
+                .findFirst();
+        SunsaDevicesResponse.Result response = match.orElse(null);
+        SunsaDeviceResponse deviceResponse = new SunsaDeviceResponse();
+        assert response != null;
+        deviceResponse.setIdDevice(response.getIdDevice().toString());
+        deviceResponse.setPosition(response.getPosition().toString());
+        return deviceResponse;
     }
 
     public SunsaDeviceResponse setShadePosition(Device device, String position) {

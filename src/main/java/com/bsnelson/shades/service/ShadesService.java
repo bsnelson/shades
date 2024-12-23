@@ -28,7 +28,7 @@ public class ShadesService {
     private final DeviceConfiguration deviceConfiguration;
     private final RetryConfiguration retryConfiguration;
 
-    public ListDevicesResponse getList() {
+    public SomaDevicesResponse getList() {
         return somaShadesClient.getDeviceList();
     }
 
@@ -38,7 +38,14 @@ public class ShadesService {
 
     public DevicesResponse getStates() {
         List<CompletableFuture<IResponse>> futures = deviceConfiguration.getDevices().stream()
-                .map(device -> CompletableFuture.supplyAsync(() -> somaShadesClient.getShadeState(device)))
+                .map(device -> CompletableFuture.supplyAsync(() -> {
+                    if (device.getType().equals("sunsa")) {
+                        return sunsaShadesClient.getShadeState(device);
+                    } else if (device.getType().equals("soma")) {
+                        return somaShadesClient.getShadeState(device);
+                    }
+                    return null;
+                }))
                 .toList();
         DevicesResponse response = new DevicesResponse(futures.stream()
             .map(CompletableFuture::join) // This waits for each future to complete
