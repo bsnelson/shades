@@ -15,6 +15,7 @@ downstream:
   sunsa:
     baseUrl: https://sunsahomes.com/api/public
     apiKey: 6048c8b7-5d39-4a60-ae5f-73da348d6c8b
+    idUser: "4963"
   retries: 2
   api:
     soma:

@@ -27,6 +27,10 @@ public class SunsaConfiguration {
     @Value("${downstream.sunsa.apiKey}")
     private String apiKey;
 
+    @Getter
+    @Value("${downstream.sunsa.idUser}")
+    private String idUser;
+
     @Data
     @AllArgsConstructor
     @Valid

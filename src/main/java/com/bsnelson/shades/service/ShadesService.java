@@ -32,9 +32,9 @@ public class ShadesService {
         return somaShadesClient.getDeviceList();
     }
 
-    public CloseAllResponse closeAllShades() {
-        return somaShadesClient.closeAllShades();
-    }
+//    public CloseAllResponse closeAllShades() {
+//        return somaShadesClient.closeAllShades();
+//    }
 
     public DevicesResponse getStates() {
         List<CompletableFuture<IResponse>> futures = deviceConfiguration.getDevices().stream()
@@ -54,27 +54,27 @@ public class ShadesService {
         return response;
     }
 
-    public DevicesResponse setPositions(String position) {
-        List<CompletableFuture<SomaDeviceResponse>> futures = deviceConfiguration.getDevices().stream()
-            .map(device -> CompletableFuture.supplyAsync(() -> somaShadesClient.setShadePosition(device, position)))
-            .toList();
-        DevicesResponse response = new DevicesResponse(futures.stream()
-            .map(CompletableFuture::join) // This waits for each future to complete
-            .toList());
-        log.debug("Response is: " + response);
-        return response;
-    }
+//    public DevicesResponse setPositions(String position) {
+//        List<CompletableFuture<SomaDeviceResponse>> futures = deviceConfiguration.getDevices().stream()
+//            .map(device -> CompletableFuture.supplyAsync(() -> somaShadesClient.setShadePosition(device, position)))
+//            .toList();
+//        DevicesResponse response = new DevicesResponse(futures.stream()
+//            .map(CompletableFuture::join) // This waits for each future to complete
+//            .toList());
+//        log.debug("Response is: " + response);
+//        return response;
+//    }
 
-    public DevicesResponse openSeasonal() {
-        List<CompletableFuture<SomaDeviceResponse>> futures = deviceConfiguration.getDevices().stream()
-            .map(device -> CompletableFuture.supplyAsync(() -> somaShadesClient.setShadePosition(device, device.getSeasonalDefault())))
-            .toList();
-        DevicesResponse response = new DevicesResponse(futures.stream()
-            .map(CompletableFuture::join) // This waits for each future to complete
-            .toList());
-        log.debug("Response is: " + response);
-        return response;
-    }
+//    public DevicesResponse openSeasonal() {
+//        List<CompletableFuture<SomaDeviceResponse>> futures = deviceConfiguration.getDevices().stream()
+//            .map(device -> CompletableFuture.supplyAsync(() -> somaShadesClient.setShadePosition(device, device.getSeasonalDefault())))
+//            .toList();
+//        DevicesResponse response = new DevicesResponse(futures.stream()
+//            .map(CompletableFuture::join) // This waits for each future to complete
+//            .toList());
+//        log.debug("Response is: " + response);
+//        return response;
+//    }
 
     public DurableOperationResponse reopen() {
         return durablePosition(true, "");
@@ -117,10 +117,10 @@ public class ShadesService {
                 .map(deviceResponse -> {
                     if (deviceResponse instanceof SomaDeviceResponse somaResponse) {
                         return somaResponse.getId();
-                    } else if (deviceResponse instanceof SunsaDeviceResponse sunsaResponse) {
+                    } else {
+                        SunsaDeviceResponse sunsaResponse = (SunsaDeviceResponse) deviceResponse;
                         return sunsaResponse.getIdDevice();
                     }
-                    return null;
                 })
                 .collect(toList());
 
