@@ -10,8 +10,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SunsaDeviceResponse implements IResponse{
-    String idDevice;
-    String name;
-    String position;
-    String apiUrl;
+    private Device device;
+    @Data
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class Device {
+        String idDevice;
+        String name;
+        String position;
+    }
 }

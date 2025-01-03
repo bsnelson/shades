@@ -35,48 +35,48 @@ public class ShadesController {
         return result;
     }
 
-    @GetMapping(
-            value = "/setPositions/{position}",
-            produces = {MediaType.APPLICATION_JSON_VALUE})
-    public DevicesResponse setPositions(
-            @PathVariable("position")
-            String position) {
-        log.debug("Entering setPositions service");
-        DevicesResponse result = shadesService.setPositions(position);
-        log.debug("Finished setPositions service");
-        return result;
-    }
-
-    @GetMapping(
-        value = "/close",
-        produces = {MediaType.APPLICATION_JSON_VALUE})
-    public CloseAllResponse closeAllShades() {
-        log.debug("Entering closeAll service");
-        CloseAllResponse result = shadesService.closeAllShades();
-        log.debug("Finished closeAll service");
-        return result;
-    }
-
-    @GetMapping(
-        value = "/closeOld",
-        produces = {MediaType.APPLICATION_JSON_VALUE})
-    public DevicesResponse close() {
-        log.debug("Entering close service");
-        DevicesResponse result = shadesService.setPositions("100");
-        log.debug("Finished close service");
-        return result;
-    }
-
-    @GetMapping(
-            value = "/openSeasonal",
-            produces = {MediaType.APPLICATION_JSON_VALUE})
-    public DevicesResponse openSeasonal() {
-        log.debug("Entering openSeasonal service");
-        DevicesResponse result = shadesService.openSeasonal();
-        log.debug("Finished openSeasonal service");
-        return result;
-    }
-
+//    @GetMapping(
+//            value = "/setPositions/{position}",
+//            produces = {MediaType.APPLICATION_JSON_VALUE})
+//    public DevicesResponse setPositions(
+//            @PathVariable("position")
+//            String position) {
+//        log.debug("Entering setPositions service");
+//        DevicesResponse result = shadesService.setPositions(position);
+//        log.debug("Finished setPositions service");
+//        return result;
+//    }
+//
+//    @GetMapping(
+//        value = "/close",
+//        produces = {MediaType.APPLICATION_JSON_VALUE})
+//    public CloseAllResponse closeAllShades() {
+//        log.debug("Entering closeAll service");
+//        CloseAllResponse result = shadesService.closeAllShades();
+//        log.debug("Finished closeAll service");
+//        return result;
+//    }
+//
+//    @GetMapping(
+//        value = "/closeOld",
+//        produces = {MediaType.APPLICATION_JSON_VALUE})
+//    public DevicesResponse close() {
+//        log.debug("Entering close service");
+//        DevicesResponse result = shadesService.setPositions("100");
+//        log.debug("Finished close service");
+//        return result;
+//    }
+//
+//    @GetMapping(
+//            value = "/openSeasonal",
+//            produces = {MediaType.APPLICATION_JSON_VALUE})
+//    public DevicesResponse openSeasonal() {
+//        log.debug("Entering openSeasonal service");
+//        DevicesResponse result = shadesService.openSeasonal();
+//        log.debug("Finished openSeasonal service");
+//        return result;
+//    }
+//
     @GetMapping(
         value = "/reopen",
         produces = {MediaType.APPLICATION_JSON_VALUE})

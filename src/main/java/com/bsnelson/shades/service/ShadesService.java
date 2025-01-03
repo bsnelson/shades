@@ -110,16 +110,16 @@ public class ShadesService {
                         if (deviceResponse instanceof SomaDeviceResponse somaResponse) {
                             return ERROR.equals(somaResponse.getResult());
                         } else if (deviceResponse instanceof SunsaDeviceResponse sunsaResponse) {
-                            return sunsaResponse.getPosition().equals(position));
+                            return !isNextHighestMultipleOfTen(useSeasonal ? getSeasonalFromDeviceId(getIdFromIResponse(deviceResponse)) : position, sunsaResponse.getDevice().getPosition());  //.getSeasonalDefault() : position, sunsaResponse.getDevice().getPosition());
                         }
                         return false; // Unknown type, exclude it
                     })
                 .map(deviceResponse -> {
                     if (deviceResponse instanceof SomaDeviceResponse somaResponse) {
-                        return somaResponse.getId();
+                        return somaResponse.getMac();
                     } else {
                         SunsaDeviceResponse sunsaResponse = (SunsaDeviceResponse) deviceResponse;
-                        return sunsaResponse.getIdDevice();
+                        return sunsaResponse.getDevice().getIdDevice();
                     }
                 })
                 .collect(toList());
@@ -164,5 +164,28 @@ public class ShadesService {
                 .findFirst()
                 .orElse(null))
             .collect(toList());
+    }
+
+    private String getIdFromIResponse(IResponse response) {
+        if (response instanceof SomaDeviceResponse somaResponse) {
+            return somaResponse.getMac();
+        } else if (response instanceof SunsaDeviceResponse sunsaResponse) {
+            return sunsaResponse.getDevice().getIdDevice();
+        }
+        return null;
+    }
+
+    private String getSeasonalFromDeviceId(String id) {
+        return deviceConfiguration.getDevices().stream()
+            .filter(device -> device.getId().equals(id))
+            .findFirst()
+            .map(Device::getSeasonalDefault)
+            .orElse(null);
+    }
+
+    private boolean isNextHighestMultipleOfTen(String position, String getPosition) {
+        int pos = Integer.parseInt(position);
+        int nextMultipleOfTen = ((pos + 9) / 10) * 10;
+        return Integer.parseInt(getPosition) == nextMultipleOfTen;
     }
 }

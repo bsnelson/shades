@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 public class SomaDeviceResponse implements IResponse{
     String result;
     String version;
-    String id;
+    String mac;
     String position;
     Boolean closed_upwards;
 }
