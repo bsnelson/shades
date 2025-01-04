@@ -18,7 +18,7 @@ public class SomaListResponse implements IResponse{
     @Data
     public static class Result {
         String name;
-        String id;
+        String mac;
         String type;
         String gen;
     }
