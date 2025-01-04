@@ -1,9 +1,6 @@
 package com.bsnelson.shades.controller;
 
-import com.bsnelson.shades.models.CloseAllResponse;
-import com.bsnelson.shades.models.DevicesResponse;
-import com.bsnelson.shades.models.DurableOperationResponse;
-import com.bsnelson.shades.models.SomaDevicesResponse;
+import com.bsnelson.shades.models.*;
 import com.bsnelson.shades.service.ShadesService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +18,7 @@ public class ShadesController {
     @GetMapping(
         value = "/listDevices",
         produces = {MediaType.APPLICATION_JSON_VALUE})
-    public SomaDevicesResponse listDevices() {
+    public DeviceListResponse listDevices() {
         return shadesService.getList();
     }
 

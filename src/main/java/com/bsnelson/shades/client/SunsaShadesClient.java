@@ -4,7 +4,6 @@ import com.bsnelson.shades.config.Device;
 import com.bsnelson.shades.config.SunsaConfiguration;
 import com.bsnelson.shades.exception.RestTemplateResponseErrorHandler;
 import com.bsnelson.shades.models.*;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
@@ -28,30 +27,26 @@ public class SunsaShadesClient {
     private WebClient shadesWebClient;
     private SunsaConfiguration sunsaConfiguration;
 
-    public SunsaDevicesResponse getDeviceList() {
+    public SunsaListResponse getDeviceList() {
         log.debug("In listDevices");
         String uri = UriComponentsBuilder.fromUriString(sunsaConfiguration.getSunsaBaseUrl())
                 .path(sunsaConfiguration.getListDevices().getPath())
-                .build()
+                .queryParam("publicApiKey", sunsaConfiguration.getApiKey())
+                .buildAndExpand(sunsaConfiguration.getIdUser())
                 .toString();
-        return (SunsaDevicesResponse) clientGet(uri, SunsaDevicesResponse.class);
+        return (SunsaListResponse) clientGet(uri, SunsaListResponse.class);
     }
 
-    public SunsaDeviceResponse getShadeState(Device device) {
+    public SunsaListDeviceResponse getShadeState(Device device) {
         log.debug("In getShadeState");
-        SunsaDevicesResponse devicesResponse = this.getDeviceList();
-        Optional<SunsaDevicesResponse.Result> match = devicesResponse.getDevices().stream()
-                .filter(sunsaDeviceResponse -> sunsaDeviceResponse.getIdDevice().toString().equals(device.getId()))
+        SunsaListResponse devicesResponse = this.getDeviceList();
+        Optional<SunsaListDeviceResponse> match = devicesResponse.getDevices().stream()
+                .filter(sunsaDeviceResponse -> ((Integer) sunsaDeviceResponse.getIdDevice()).toString().equals(device.getId()))
                 .findFirst();
-        SunsaDevicesResponse.Result response = match.orElse(null);
-        SunsaDeviceResponse deviceResponse = new SunsaDeviceResponse();
-        assert response != null;
-        deviceResponse.getDevice().setIdDevice(response.getIdDevice().toString());
-        deviceResponse.getDevice().setPosition(response.getPosition().toString());
-        return deviceResponse;
+        return match.orElse(null);
     }
 
-    public SunsaDeviceResponse setShadePosition(Device device, String position) {
+    public SunsaPutDeviceResponse setShadePosition(Device device, String position) {
         log.debug("In setPosition");
         String uri = UriComponentsBuilder.fromUriString(sunsaConfiguration.getSunsaBaseUrl())
                 .path(sunsaConfiguration.getSetShadePosition().getPath())
@@ -59,7 +54,7 @@ public class SunsaShadesClient {
                 .toString();
         String template = "{ \"Position\": %s }";
         String body = String.format(template, position);
-        return (SunsaDeviceResponse) clientPut(uri, body);
+        return (SunsaPutDeviceResponse) clientPut(uri, body);
     }
 
     private <T> IResponse clientGet(String url, Class<T> clazz) {
@@ -94,7 +89,7 @@ public class SunsaShadesClient {
         log.debug("Raw response body: {}", response.getBody());
 
         ObjectMapper objectMapper = new ObjectMapper();
-        SunsaDeviceResponse deviceResponse = objectMapper.readValue(response.getBody(), SunsaDeviceResponse.class);
+        SunsaPutDeviceResponse deviceResponse = objectMapper.readValue(response.getBody(), SunsaPutDeviceResponse.class);
 
         return deviceResponse;
     }}

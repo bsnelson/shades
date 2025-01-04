@@ -9,11 +9,11 @@ logging:
 
 downstream:
   soma:
-    # connectIp: http://192.168.7.30:3000 # intentional bad IP address
-    connectIp: http://localhost:8083
+    connectIp: http://192.168.7.30:3000 # intentional bad IP address
+    # connectIp: http://localhost:8083
   sunsa:
-    # baseUrl: https://sunsahomes.com/api/public
-    baseUrl: http://localhost:8083/api/public
+    baseUrl: https://sunsahomes.com/api/public
+    # baseUrl: http://localhost:8083/api/public
     apiKey: 6048c8b7-5d39-4a60-ae5f-73da348d6c8b
     idUser: "4963"
   retries: 2

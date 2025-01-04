@@ -5,19 +5,21 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class SunsaDeviceResponse implements IResponse{
-    private Device device;
+public class SomaListResponse implements IResponse{
+    String result;
+    String version;
+    List<Result> shades;
     @Data
-    @Builder
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class Device {
-        String idDevice;
+    public static class Result {
         String name;
-        String position;
+        String id;
+        String type;
+        String gen;
     }
 }

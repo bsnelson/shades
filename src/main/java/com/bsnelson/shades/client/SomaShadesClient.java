@@ -19,13 +19,13 @@ public class SomaShadesClient {
     private WebClient shadesWebClient;
     private SomaConfiguration somaConfiguration;
 
-    public SomaDevicesResponse getDeviceList() {
+    public SomaListResponse getDeviceList() {
         log.debug("In listDevices");
         String uri = UriComponentsBuilder.fromUriString(somaConfiguration.getConnectIpAddress())
             .path(somaConfiguration.getListDevices().getPath())
             .build()
             .toString();
-        return (SomaDevicesResponse) callClient(uri, SomaDevicesResponse.class);
+        return (SomaListResponse) callClient(uri, SomaListResponse.class);
     }
 
     public CloseAllResponse closeAllShades() {

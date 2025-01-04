@@ -28,8 +28,14 @@ public class ShadesService {
     private final DeviceConfiguration deviceConfiguration;
     private final RetryConfiguration retryConfiguration;
 
-    public SomaDevicesResponse getList() {
-        return somaShadesClient.getDeviceList();
+    public DeviceListResponse getList() {
+        List<SomaListResponse.Result> somaDevices = somaShadesClient.getDeviceList().getShades();
+        List<SunsaListDeviceResponse> sunsaDevices = sunsaShadesClient.getDeviceList().getDevices();
+
+        return DeviceListResponse.builder()
+                .somaDevices(somaDevices)
+                .sunsaDevices(sunsaDevices)
+                .build();
     }
 
 //    public CloseAllResponse closeAllShades() {
@@ -109,7 +115,7 @@ public class ShadesService {
                         // Check the type and process accordingly
                         if (deviceResponse instanceof SomaDeviceResponse somaResponse) {
                             return ERROR.equals(somaResponse.getResult());
-                        } else if (deviceResponse instanceof SunsaDeviceResponse sunsaResponse) {
+                        } else if (deviceResponse instanceof SunsaPutDeviceResponse sunsaResponse) {
                             return !isNextHighestMultipleOfTen(useSeasonal ? getSeasonalFromDeviceId(getIdFromIResponse(deviceResponse)) : position, sunsaResponse.getDevice().getPosition());  //.getSeasonalDefault() : position, sunsaResponse.getDevice().getPosition());
                         }
                         return false; // Unknown type, exclude it
@@ -118,7 +124,7 @@ public class ShadesService {
                     if (deviceResponse instanceof SomaDeviceResponse somaResponse) {
                         return somaResponse.getMac();
                     } else {
-                        SunsaDeviceResponse sunsaResponse = (SunsaDeviceResponse) deviceResponse;
+                        SunsaPutDeviceResponse sunsaResponse = (SunsaPutDeviceResponse) deviceResponse;
                         return sunsaResponse.getDevice().getIdDevice();
                     }
                 })
@@ -169,7 +175,7 @@ public class ShadesService {
     private String getIdFromIResponse(IResponse response) {
         if (response instanceof SomaDeviceResponse somaResponse) {
             return somaResponse.getMac();
-        } else if (response instanceof SunsaDeviceResponse sunsaResponse) {
+        } else if (response instanceof SunsaPutDeviceResponse sunsaResponse) {
             return sunsaResponse.getDevice().getIdDevice();
         }
         return null;
