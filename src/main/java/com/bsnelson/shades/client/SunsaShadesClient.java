@@ -53,7 +53,7 @@ public class SunsaShadesClient {
                 .buildAndExpand(sunsaConfiguration.getIdUser(), device.getId(), sunsaConfiguration.getApiKey())
                 .toString();
         String template = "{ \"Position\": %s }";
-        String body = String.format(template, position);
+        String body = String.format(template, "-" + position); // Sunsa uses negative for closing upward
         return (SunsaPutDeviceResponse) clientPut(uri, body);
     }
 

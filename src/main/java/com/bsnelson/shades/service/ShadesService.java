@@ -192,6 +192,7 @@ public class ShadesService {
     private boolean isNextHighestMultipleOfTen(String position, String getPosition) {
         int pos = Integer.parseInt(position);
         int nextMultipleOfTen = ((pos + 9) / 10) * 10;
-        return Integer.parseInt(getPosition) == nextMultipleOfTen;
+        return Integer.parseInt(getPosition) == nextMultipleOfTen ||
+                Integer.parseInt(getPosition) == -nextMultipleOfTen;
     }
 }
