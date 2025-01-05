@@ -53,16 +53,16 @@ downstream:
       name: OfficeMiddle
       seasonalDefault: 35
       groups: ["Office", "Seasonal", "All"]
-    - id: "de:b8:32:e4:63:21"
-      type: soma
-      name: OfficeRight
-      seasonalDefault: 35
-      groups: ["Office", "Seasonal", "All"]
-    - id: "c6:08:10:c8:f7:64"
-      type: soma
-      name: KitchenRear
-      seasonalDefault: 0
-      groups: ["Kitchen", "All"]
+#    - id: "de:b8:32:e4:63:21"
+#      type: soma
+#      name: OfficeRight
+#      seasonalDefault: 35
+#      groups: ["Office", "Seasonal", "All"]
+#    - id: "c6:08:10:c8:f7:64"
+#      type: soma
+#      name: KitchenRear
+#      seasonalDefault: 0
+#      groups: ["Kitchen", "All"]
     - id: "d0:e4:4e:28:c5:ae"
       type: soma
       name: KitchenSide
@@ -88,6 +88,16 @@ downstream:
       name: MikiOffice
       seasonalDefault: 0
       groups: ["All"]
+    - id: "17173"
+      type: sunsa
+      name: KitchenRear
+      seasonalDefault: 0
+      groups: ["Kitchen", "All"]
+    - id: "17147"
+      type: sunsa
+      name: OfficeRight
+      seasonalDefault: 60
+      groups: ["Office", "All"]
 
 
 
