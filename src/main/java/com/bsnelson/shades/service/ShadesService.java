@@ -81,17 +81,6 @@ public class ShadesService {
         return response;
     }
 
-//    public DevicesResponse setPositions(String position) {
-//        List<CompletableFuture<SomaDeviceResponse>> futures = deviceConfiguration.getDevices().stream()
-//            .map(device -> CompletableFuture.supplyAsync(() -> somaShadesClient.setShadePosition(device, position)))
-//            .toList();
-//        DevicesResponse response = new DevicesResponse(futures.stream()
-//            .map(CompletableFuture::join) // This waits for each future to complete
-//            .toList());
-//        log.debug("Response is: " + response);
-//        return response;
-//    }
-
 //    public DevicesResponse openSeasonal() {
 //        List<CompletableFuture<SomaDeviceResponse>> futures = deviceConfiguration.getDevices().stream()
 //            .map(device -> CompletableFuture.supplyAsync(() -> somaShadesClient.setShadePosition(device, device.getSeasonalDefault())))
