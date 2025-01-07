@@ -38,10 +38,6 @@ public class ShadesService {
                 .build();
     }
 
-//    public CloseAllResponse closeAllShades() {
-//        return somaShadesClient.closeAllShades();
-//    }
-
     public DevicesResponse getStates() {
         List<CompletableFuture<IResponse>> futures = deviceConfiguration.getDevices().stream()
                 .map(device -> CompletableFuture.supplyAsync(() -> {
@@ -56,6 +52,31 @@ public class ShadesService {
         DevicesResponse response = new DevicesResponse(futures.stream()
             .map(CompletableFuture::join) // This waits for each future to complete
             .toList());
+        log.debug("Response is: " + response);
+        return response;
+    }
+
+    public DevicesResponse setPosition(String position, String group, String name) {
+        List<Device> filteredDevices = deviceConfiguration.getDevices().stream()
+                .filter(device -> (group == null || device.getGroups().contains(group)) &&
+                        (name == null || device.getName().equals(name)))
+                .toList();
+
+        List<CompletableFuture<IResponse>> futures = filteredDevices.stream()
+                .map(device -> CompletableFuture.supplyAsync(() -> {
+                    if (device.getType().equals("sunsa")) {
+                        return sunsaShadesClient.setShadePosition(device, position);
+                    } else if (device.getType().equals("soma")) {
+                        return somaShadesClient.setShadePosition(device, position);
+                    }
+                    return null;
+                }))
+                .toList();
+
+        DevicesResponse response = new DevicesResponse(futures.stream()
+                .map(CompletableFuture::join) // This waits for each future to complete
+                .toList());
+
         log.debug("Response is: " + response);
         return response;
     }

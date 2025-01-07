@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.http.MediaType;
 
@@ -32,38 +33,19 @@ public class ShadesController {
         return result;
     }
 
-//    @GetMapping(
-//            value = "/setPositions/{position}",
-//            produces = {MediaType.APPLICATION_JSON_VALUE})
-//    public DevicesResponse setPositions(
-//            @PathVariable("position")
-//            String position) {
-//        log.debug("Entering setPositions service");
-//        DevicesResponse result = shadesService.setPositions(position);
-//        log.debug("Finished setPositions service");
-//        return result;
-//    }
-//
-//    @GetMapping(
-//        value = "/close",
-//        produces = {MediaType.APPLICATION_JSON_VALUE})
-//    public CloseAllResponse closeAllShades() {
-//        log.debug("Entering closeAll service");
-//        CloseAllResponse result = shadesService.closeAllShades();
-//        log.debug("Finished closeAll service");
-//        return result;
-//    }
-//
-//    @GetMapping(
-//        value = "/closeOld",
-//        produces = {MediaType.APPLICATION_JSON_VALUE})
-//    public DevicesResponse close() {
-//        log.debug("Entering close service");
-//        DevicesResponse result = shadesService.setPositions("100");
-//        log.debug("Finished close service");
-//        return result;
-//    }
-//
+    @GetMapping(
+            value = "/setPosition/{position}",
+            produces = {MediaType.APPLICATION_JSON_VALUE})
+    public DevicesResponse setPosition(
+            @PathVariable("position") String position,
+            @RequestParam(value = "group", required = false) String group,
+            @RequestParam(value = "name", required = false) String name) {
+        log.debug("Entering setPositions service with position: {}, group: {}, name: {}", position, group, name);
+        DevicesResponse result = shadesService.setPosition(position, group, name);
+        log.debug("Finished setPositions service");
+        return result;
+    }
+
 //    @GetMapping(
 //            value = "/openSeasonal",
 //            produces = {MediaType.APPLICATION_JSON_VALUE})

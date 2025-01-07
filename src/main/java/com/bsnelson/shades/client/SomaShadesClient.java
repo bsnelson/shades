@@ -16,7 +16,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Component
 @Slf4j
 public class SomaShadesClient {
-    private WebClient shadesWebClient;
     private SomaConfiguration somaConfiguration;
 
     public SomaListResponse getDeviceList() {

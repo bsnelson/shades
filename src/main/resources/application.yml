@@ -96,7 +96,7 @@ downstream:
     - id: "17147"
       type: sunsa
       name: OfficeRight
-      seasonalDefault: 60
+      seasonalDefault: 40
       groups: ["Office", "All"]
 
 
