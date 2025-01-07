@@ -38,6 +38,17 @@ public class ShadesService {
                 .build();
     }
 
+    public NamesResponse listNames() {
+        List<String> names = deviceConfiguration.getDevices().stream()
+                .map(Device::getName)
+                .toList();
+        List<String> groups = deviceConfiguration.getDevices().stream()
+                .flatMap(device -> device.getGroups().stream())
+                .distinct()
+                .toList();
+        return new NamesResponse(names, groups);
+    }
+
     public DevicesResponse getStates() {
         List<CompletableFuture<IResponse>> futures = deviceConfiguration.getDevices().stream()
                 .map(device -> CompletableFuture.supplyAsync(() -> {

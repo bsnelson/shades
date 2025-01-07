@@ -24,6 +24,13 @@ public class ShadesController {
     }
 
     @GetMapping(
+            value = "/listNames",
+            produces = {MediaType.APPLICATION_JSON_VALUE})
+    public NamesResponse listNames() {
+        return shadesService.listNames();
+    }
+
+    @GetMapping(
             value = "/getStates",
             produces = {MediaType.APPLICATION_JSON_VALUE})
     public DevicesResponse getStates() {
