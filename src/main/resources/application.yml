@@ -1,5 +1,5 @@
 server:
-  port: 8081
+  port: 8082
 spring:
   application:
     name: shades
@@ -53,16 +53,6 @@ downstream:
       name: OfficeMiddle
       seasonalDefault: 35
       groups: ["Office", "Seasonal", "All"]
-#    - id: "de:b8:32:e4:63:21"
-#      type: soma
-#      name: OfficeRight
-#      seasonalDefault: 35
-#      groups: ["Office", "Seasonal", "All"]
-#    - id: "c6:08:10:c8:f7:64"
-#      type: soma
-#      name: KitchenRear
-#      seasonalDefault: 0
-#      groups: ["Kitchen", "All"]
     - id: "d0:e4:4e:28:c5:ae"
       type: soma
       name: KitchenSide
@@ -109,3 +99,14 @@ downstream:
 #  macMap.put("d8:85:46:5b:0c:55", "OfficeLeft");
 #  macMap.put("de:75:b8:79:20:4c", "OfficeMiddle");
 #  macMap.put("de:b8:32:e4:63:21", "OfficeRight");
+
+#    - id: "de:b8:32:e4:63:21"
+#      type: soma
+#      name: OfficeRight
+#      seasonalDefault: 35
+#      groups: ["Office", "Seasonal", "All"]
+#    - id: "c6:08:10:c8:f7:64"
+#      type: soma
+#      name: KitchenRear
+#      seasonalDefault: 0
+#      groups: ["Kitchen", "All"]

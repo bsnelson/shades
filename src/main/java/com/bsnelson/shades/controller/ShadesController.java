@@ -4,15 +4,15 @@ import com.bsnelson.shades.models.*;
 import com.bsnelson.shades.service.ShadesService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.http.MediaType;
+
+import static org.springframework.web.bind.annotation.RequestMethod.*;
 
 @AllArgsConstructor
 @RestController
 @Slf4j
+@CrossOrigin(origins = "*", allowedHeaders = "*", methods = {GET, POST, PUT, DELETE, OPTIONS})
 public class ShadesController {
     private ShadesService shadesService;
 

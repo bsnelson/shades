@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -60,9 +61,17 @@ public class ShadesService {
                     return null;
                 }))
                 .toList();
-        DevicesResponse response = new DevicesResponse(futures.stream()
-            .map(CompletableFuture::join) // This waits for each future to complete
-            .toList());
+        List<IResponse> somaResponses = futures.stream()
+                .map(CompletableFuture::join)
+                .filter(response -> response instanceof SomaDeviceResponse)
+                .toList();
+
+        List<IResponse> sunsaResponses = futures.stream()
+                .map(CompletableFuture::join)
+                .filter(response -> response instanceof SunsaListDeviceResponse)
+                .toList();
+
+        DevicesResponse response = new DevicesResponse(sunsaResponses, somaResponses);
         log.debug("Response is: " + response);
         return response;
     }
@@ -84,10 +93,17 @@ public class ShadesService {
                 }))
                 .toList();
 
-        DevicesResponse response = new DevicesResponse(futures.stream()
-                .map(CompletableFuture::join) // This waits for each future to complete
-                .toList());
+        List<IResponse> somaResponses = futures.stream()
+                .map(CompletableFuture::join)
+                .filter(response -> response instanceof SomaDeviceResponse)
+                .toList();
 
+        List<IResponse> sunsaResponses = futures.stream()
+                .map(CompletableFuture::join)
+                .filter(response -> response instanceof SunsaPutDeviceResponse)
+                .toList();
+
+        DevicesResponse response = new DevicesResponse(sunsaResponses, somaResponses);
         log.debug("Response is: " + response);
         return response;
     }
@@ -128,29 +144,45 @@ public class ShadesService {
                     return null;
                 }))
                 .toList();
-            DevicesResponse response = new DevicesResponse(futures.stream()
-                .map(CompletableFuture::join) // This waits for each future to complete
-                .toList());
-            List<String> failedDevices = response.getResponses().stream()
+            List<IResponse> somaResponses = futures.stream()
+                    .map(CompletableFuture::join)
+                    .filter(response -> response instanceof SomaDeviceResponse)
+                    .toList();
+            List<IResponse> sunsaResponses = futures.stream()
+                    .map(CompletableFuture::join)
+                    .filter(response -> response instanceof SunsaPutDeviceResponse)
+                    .toList();
+            DevicesResponse response = new DevicesResponse(sunsaResponses, somaResponses);
+            List<String> failedSomaDevices = response.getSomaDevices().stream()
                 .filter(deviceResponse -> {
                         // Check the type and process accordingly
                         if (deviceResponse instanceof SomaDeviceResponse somaResponse) {
                             return ERROR.equals(somaResponse.getResult());
-                        } else if (deviceResponse instanceof SunsaPutDeviceResponse sunsaResponse) {
-                            return !isNextHighestMultipleOfTen(useSeasonal ? getSeasonalFromDeviceId(getIdFromIResponse(deviceResponse)) : position, sunsaResponse.getDevice().getPosition());  //.getSeasonalDefault() : position, sunsaResponse.getDevice().getPosition());
                         }
                         return false; // Unknown type, exclude it
                     })
                 .map(deviceResponse -> {
-                    if (deviceResponse instanceof SomaDeviceResponse somaResponse) {
-                        return somaResponse.getMac();
-                    } else {
+                    SomaDeviceResponse somaResponse = (SomaDeviceResponse) deviceResponse;
+                    return somaResponse.getMac();
+                })
+                .toList();
+
+            List<String> failedSunsaDevices = response.getSomaDevices().stream()
+                    .filter(deviceResponse -> {
+                        // Check the type and process accordingly
+                        if (deviceResponse instanceof SunsaPutDeviceResponse sunsaResponse) {
+                            return !isNextHighestMultipleOfTen(useSeasonal ? getSeasonalFromDeviceId(getIdFromIResponse(deviceResponse)) : position, sunsaResponse.getDevice().getPosition());  //.getSeasonalDefault() : position, sunsaResponse.getDevice().getPosition());
+                        }
+                        return false; // Unknown type, exclude it
+                    })
+                    .map(deviceResponse -> {
                         SunsaPutDeviceResponse sunsaResponse = (SunsaPutDeviceResponse) deviceResponse;
                         return sunsaResponse.getDevice().getIdDevice();
-                    }
-                })
-                .collect(toList());
-
+                    })
+                    .toList();
+            List<String> failedDevices = new ArrayList<>();
+            failedDevices.addAll(failedSunsaDevices);
+            failedDevices.addAll(failedSomaDevices);
             if (failedDevices.isEmpty()) {
                 durableResponse.setResult("success");
                 durableResponse.setFailedDevices(null);
