@@ -41,6 +41,16 @@ public class ShadesController {
     }
 
     @GetMapping(
+            value = "/getBattery",
+            produces = {MediaType.APPLICATION_JSON_VALUE})
+    public DevicesResponse getBattery() {
+        log.debug("Entering getBattery service");
+        DevicesResponse result = shadesService.getBattery();
+        log.debug("Finished getBattery service");
+        return result;
+    }
+
+    @GetMapping(
             value = "/setPosition/{position}",
             produces = {MediaType.APPLICATION_JSON_VALUE})
     public DevicesResponse setPosition(

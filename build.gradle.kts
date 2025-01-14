@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "com.bsnelson"
-version = "2.0.2"
+version = "2.0.5"
 
 java {
 

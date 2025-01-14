@@ -76,6 +76,32 @@ public class ShadesService {
         return response;
     }
 
+    public DevicesResponse getBattery() {
+        List<CompletableFuture<IResponse>> futures = deviceConfiguration.getDevices().stream()
+                .map(device -> CompletableFuture.supplyAsync(() -> {
+                    if (device.getType().equals("sunsa")) {
+                        return sunsaShadesClient.getShadeState(device);
+                    } else if (device.getType().equals("soma")) {
+                        return somaShadesClient.getBatteryState(device);
+                    }
+                    return null;
+                }))
+                .toList();
+        List<IResponse> somaResponses = futures.stream()
+                .map(CompletableFuture::join)
+                .filter(response -> response instanceof SomaDeviceResponse)
+                .toList();
+
+        List<IResponse> sunsaResponses = futures.stream()
+                .map(CompletableFuture::join)
+                .filter(response -> response instanceof SunsaListDeviceResponse)
+                .toList();
+
+        DevicesResponse response = new DevicesResponse(sunsaResponses, somaResponses);
+        log.debug("Response is: " + response);
+        return response;
+    }
+
     public DevicesResponse setPosition(String position, String group, String name) {
         List<Device> filteredDevices = deviceConfiguration.getDevices().stream()
                 .filter(device -> (group == null || device.getGroups().contains(group)) &&

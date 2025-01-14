@@ -20,6 +20,7 @@ public class SomaConfiguration {
     private ApiEndpoint getShadeState;
     private ApiEndpoint setShadePosition;
     private ApiEndpoint closeAllShades;
+    private ApiEndpoint getBatteryLevel;
 
     @Getter
     @Value("${downstream.soma.connectIp}")
