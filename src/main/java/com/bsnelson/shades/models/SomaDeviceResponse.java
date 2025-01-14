@@ -13,6 +13,7 @@ public class SomaDeviceResponse implements IResponse{
     String result;
     String version;
     String mac;
+    String name;
     String position;
     Boolean closed_upwards;
     Integer battery_percentage;

@@ -42,7 +42,9 @@ public class SomaShadesClient {
             .path(somaConfiguration.getGetShadeState().getPath())
             .buildAndExpand(device.getId())
             .toString();
-        return (SomaDeviceResponse) callClient(uri, SomaDeviceResponse.class);
+        SomaDeviceResponse response = (SomaDeviceResponse) callClient(uri, SomaDeviceResponse.class);
+        response.setName(device.getName());
+        return response;
     }
 
     public SomaDeviceResponse getBatteryState(Device device) {
@@ -51,7 +53,9 @@ public class SomaShadesClient {
                 .path(somaConfiguration.getGetBatteryLevel().getPath())
                 .buildAndExpand(device.getId())
                 .toString();
-        return (SomaDeviceResponse) callClient(uri, SomaDeviceResponse.class);
+        SomaDeviceResponse response = (SomaDeviceResponse) callClient(uri, SomaDeviceResponse.class);
+        response.setName(device.getName());
+        return response;
     }
 
     public SomaDeviceResponse setShadePosition(Device device, String position) {
@@ -60,7 +64,9 @@ public class SomaShadesClient {
             .path(somaConfiguration.getSetShadePosition().getPath())
             .buildAndExpand(device.getId(), position)
             .toString();
-        return (SomaDeviceResponse) callClient(uri, SomaDeviceResponse.class);
+        SomaDeviceResponse response = (SomaDeviceResponse) callClient(uri, SomaDeviceResponse.class);
+        response.setName(device.getName());
+        return response;
     }
 
     private <T> IResponse callClient(String url, Class<T> clazz) {
