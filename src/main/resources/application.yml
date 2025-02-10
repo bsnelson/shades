@@ -69,8 +69,8 @@ downstream:
       name: LivingMiddle
       seasonalDefault: 0
       groups: ["Living", "All"]
-    - id: "fd:a1:05:1a:e8:d6"
-      type: soma
+    - id: "17803"
+      type: sunsa
       name: LivingRight
       seasonalDefault: 0
       groups: ["Living", "All"]
