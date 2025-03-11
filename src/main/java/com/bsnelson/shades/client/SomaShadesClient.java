@@ -9,7 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @AllArgsConstructor
@@ -62,6 +61,7 @@ public class SomaShadesClient {
         log.debug("In setPosition");
         String uri = UriComponentsBuilder.fromUriString(somaConfiguration.getConnectIpAddress())
             .path(somaConfiguration.getSetShadePosition().getPath())
+            .queryParam("close_upwards", 1)
             .buildAndExpand(device.getId(), position)
             .toString();
         SomaDeviceResponse response = (SomaDeviceResponse) callClient(uri, SomaDeviceResponse.class);

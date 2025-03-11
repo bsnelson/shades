@@ -89,6 +89,11 @@ downstream:
       name: OfficeRight
       seasonalDefault: 40
       groups: ["Office", "All"]
+    - id: "17793"
+      type: sunsa
+      name: KitchenDoor
+      seasonalDefault: 0
+      groups: ["Kitchen", "All"]
 
 
 
