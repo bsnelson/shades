@@ -48,6 +48,14 @@ public class SunsaShadesClient {
         return match.orElse(null);
     }
 
+    public BatteryStateResponse getBatteryState(Device device) {
+        SunsaListDeviceResponse deviceResponse = getShadeState(device);
+        return BatteryStateResponse.builder()
+                .name(device.getName())
+                .battery_percentage(Integer.parseInt(deviceResponse.getBatteryPercentage()))
+                .build();
+    }
+
     @CacheEvict(value = "sunsaList", allEntries = true)
     public SunsaPutDeviceResponse setShadePosition(Device device, String position) {
         log.debug("In setPosition");

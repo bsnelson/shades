@@ -46,15 +46,17 @@ public class SomaShadesClient {
         return response;
     }
 
-    public SomaDeviceResponse getBatteryState(Device device) {
+    public BatteryStateResponse getBatteryState(Device device) {
         log.debug("In getBattery");
         String uri = UriComponentsBuilder.fromUriString(somaConfiguration.getConnectIpAddress())
                 .path(somaConfiguration.getGetBatteryLevel().getPath())
                 .buildAndExpand(device.getId())
                 .toString();
         SomaDeviceResponse response = (SomaDeviceResponse) callClient(uri, SomaDeviceResponse.class);
-        response.setName(device.getName());
-        return response;
+        return BatteryStateResponse.builder()
+                .name(device.getName())
+                .battery_percentage(response.getBattery_percentage())
+                .build();
     }
 
     public SomaDeviceResponse setShadePosition(Device device, String position) {
