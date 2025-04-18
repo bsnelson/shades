@@ -64,8 +64,8 @@ downstream:
       name: LivingLeft
       seasonalDefault: 0
       groups: ["Living", "All"]
-    - id: "cd:1e:bd:f5:9b:af"
-      type: soma
+    - id: "18449"
+      type: sunsa
       name: LivingMiddle
       seasonalDefault: 0
       groups: ["Living", "All"]
@@ -116,3 +116,8 @@ downstream:
 #      name: KitchenRear
 #      seasonalDefault: 0
 #      groups: ["Kitchen", "All"]
+#    - id: "cd:1e:bd:f5:9b:af"
+#      type: soma
+#      name: LivingMiddle
+#      seasonalDefault: 0
+#      groups: ["Living", "All"]

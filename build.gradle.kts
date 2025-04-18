@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "com.bsnelson"
-version = "2.0.10"
+version = "2.0.12"
 
 java {
 	sourceCompatibility = JavaVersion.VERSION_21
