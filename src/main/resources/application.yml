@@ -59,8 +59,8 @@ downstream:
       name: KitchenSide
       seasonalDefault: 25
       groups: ["Kitchen", "Seasonal", "All"]
-    - id: "dc:e4:75:97:b0:60"
-      type: soma
+    - id: "18493"
+      type: sunsa
       name: LivingLeft
       seasonalDefault: 0
       groups: ["Living", "All"]
