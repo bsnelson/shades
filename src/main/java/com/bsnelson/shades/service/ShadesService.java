@@ -1,3 +1,4 @@
+// java
 package com.bsnelson.shades.service;
 
 import com.bsnelson.shades.client.SomaShadesClient;
@@ -15,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -42,11 +44,11 @@ public class ShadesService {
     public NamesResponse listNames() {
         List<String> names = deviceConfiguration.getDevices().stream()
                 .map(Device::getName)
-                .toList();
+                .collect(Collectors.toList());
         List<String> groups = deviceConfiguration.getDevices().stream()
                 .flatMap(device -> device.getGroups().stream())
                 .distinct()
-                .toList();
+                .collect(Collectors.toList());
         return new NamesResponse(names, groups);
     }
 
@@ -60,16 +62,16 @@ public class ShadesService {
                     }
                     return null;
                 }))
-                .toList();
+                .collect(Collectors.toList());
         List<IResponse> somaResponses = futures.stream()
                 .map(CompletableFuture::join)
                 .filter(response -> response instanceof SomaDeviceResponse)
-                .toList();
+                .collect(Collectors.toList());
 
         List<IResponse> sunsaResponses = futures.stream()
                 .map(CompletableFuture::join)
                 .filter(response -> response instanceof SunsaListDeviceResponse)
-                .toList();
+                .collect(Collectors.toList());
 
         DevicesResponse response = new DevicesResponse(sunsaResponses, somaResponses);
         log.debug("Response is: " + response);
@@ -86,11 +88,11 @@ public class ShadesService {
                     }
                     return null;
                 }))
-                .toList();
+                .collect(Collectors.toList());
         List<IResponse> batteryResponses = futures.stream()
                 .map(CompletableFuture::join)
                 .filter(response -> response instanceof BatteryStateResponse)
-                .toList();
+                .collect(Collectors.toList());
 
         GenericDevicesResponse response = new GenericDevicesResponse(batteryResponses);
         log.debug("Response is: " + response);
@@ -101,7 +103,7 @@ public class ShadesService {
         List<Device> filteredDevices = deviceConfiguration.getDevices().stream()
                 .filter(device -> (group == null || device.getGroups().contains(group)) &&
                         (name == null || device.getName().equals(name)))
-                .toList();
+                .collect(Collectors.toList());
 
         List<CompletableFuture<IResponse>> futures = filteredDevices.stream()
                 .map(device -> CompletableFuture.supplyAsync(() -> {
@@ -112,17 +114,17 @@ public class ShadesService {
                     }
                     return null;
                 }))
-                .toList();
+                .collect(Collectors.toList());
 
         List<IResponse> somaResponses = futures.stream()
                 .map(CompletableFuture::join)
                 .filter(response -> response instanceof SomaDeviceResponse)
-                .toList();
+                .collect(Collectors.toList());
 
         List<IResponse> sunsaResponses = futures.stream()
                 .map(CompletableFuture::join)
                 .filter(response -> response instanceof SunsaPutDeviceResponse)
-                .toList();
+                .collect(Collectors.toList());
 
         DevicesResponse response = new DevicesResponse(sunsaResponses, somaResponses);
         log.debug("Response is: " + response);
@@ -132,10 +134,10 @@ public class ShadesService {
 //    public DevicesResponse openSeasonal() {
 //        List<CompletableFuture<SomaDeviceResponse>> futures = deviceConfiguration.getDevices().stream()
 //            .map(device -> CompletableFuture.supplyAsync(() -> somaShadesClient.setShadePosition(device, device.getSeasonalDefault())))
-//            .toList();
+//            .collect(Collectors.toList());
 //        DevicesResponse response = new DevicesResponse(futures.stream()
 //            .map(CompletableFuture::join) // This waits for each future to complete
-//            .toList());
+//            .collect(Collectors.toList()));
 //        log.debug("Response is: " + response);
 //        return response;
 //    }
@@ -147,7 +149,7 @@ public class ShadesService {
     public DurableOperationResponse reclose() {
         return durablePosition(false, "100");
     }
-    
+
     public DurableOperationResponse durablePosition(boolean useSeasonal, String position) {
         int retriable = retryConfiguration.getRetries();
         DurableOperationResponse durableResponse = new DurableOperationResponse();
@@ -156,43 +158,45 @@ public class ShadesService {
         durableResponse.setFailedDevices(deviceConfiguration.getDevices().stream().map(Device::getName).collect(toList()));
         while(retriable >= 0 && Objects.equals(durableResponse.getResult(), ERROR)) {
             List<CompletableFuture<IResponse>> futures = mapNamesToDevices(durableResponse.getFailedDevices()).stream()
-                .map(device -> CompletableFuture.supplyAsync(() -> {
-                    if (device.getType().equals("sunsa")) {
-                        return sunsaShadesClient.setShadePosition(device, (useSeasonal ? device.getSeasonalDefault() : position));
-                    } else if (device.getType().equals("soma")) {
-                        return somaShadesClient.setShadePosition(device, (useSeasonal ? device.getSeasonalDefault() : position));
-                    }
-                    return null;
-                }))
-                .toList();
+                    .map(device -> CompletableFuture.supplyAsync(() -> {
+                        if (device.getType().equals("sunsa")) {
+                            return sunsaShadesClient.setShadePosition(device, (useSeasonal ? device.getSeasonalDefault() : position));
+                        } else if (device.getType().equals("soma")) {
+                            return somaShadesClient.setShadePosition(device, (useSeasonal ? device.getSeasonalDefault() : position));
+                        }
+                        return null;
+                    }))
+                    .collect(Collectors.toList());
             List<IResponse> somaResponses = futures.stream()
                     .map(CompletableFuture::join)
                     .filter(response -> response instanceof SomaDeviceResponse)
-                    .toList();
+                    .collect(Collectors.toList());
             List<IResponse> sunsaResponses = futures.stream()
                     .map(CompletableFuture::join)
                     .filter(response -> response instanceof SunsaPutDeviceResponse)
-                    .toList();
+                    .collect(Collectors.toList());
             DevicesResponse response = new DevicesResponse(sunsaResponses, somaResponses);
             List<String> failedSomaDevices = response.getSomaDevices().stream()
-                .filter(deviceResponse -> {
+                    .filter(deviceResponse -> {
                         // Check the type and process accordingly
-                        if (deviceResponse instanceof SomaDeviceResponse somaResponse) {
+                        if (deviceResponse instanceof SomaDeviceResponse) {
+                            SomaDeviceResponse somaResponse = (SomaDeviceResponse) deviceResponse;
                             return ERROR.equals(somaResponse.getResult());
                         }
                         return false; // Unknown type, exclude it
                     })
-                .map(deviceResponse -> {
-                    SomaDeviceResponse somaResponse = (SomaDeviceResponse) deviceResponse;
-                    return somaResponse.getMac();
-                })
-                .toList();
+                    .map(deviceResponse -> {
+                        SomaDeviceResponse somaResponse = (SomaDeviceResponse) deviceResponse;
+                        return somaResponse.getMac();
+                    })
+                    .collect(Collectors.toList());
 
             List<String> failedSunsaDevices = response.getSomaDevices().stream()
                     .filter(deviceResponse -> {
                         // Check the type and process accordingly
-                        if (deviceResponse instanceof SunsaPutDeviceResponse sunsaResponse) {
-                            return !isNextHighestMultipleOfTen(useSeasonal ? getSeasonalFromDeviceId(getIdFromIResponse(deviceResponse)) : position, sunsaResponse.getDevice().getPosition());  //.getSeasonalDefault() : position, sunsaResponse.getDevice().getPosition());
+                        if (deviceResponse instanceof SunsaPutDeviceResponse) {
+                            SunsaPutDeviceResponse sunsaResponse = (SunsaPutDeviceResponse) deviceResponse;
+                            return !isNextHighestMultipleOfTen(useSeasonal ? getSeasonalFromDeviceId(getIdFromIResponse(deviceResponse)) : position, sunsaResponse.getDevice().getPosition());
                         }
                         return false; // Unknown type, exclude it
                     })
@@ -200,7 +204,7 @@ public class ShadesService {
                         SunsaPutDeviceResponse sunsaResponse = (SunsaPutDeviceResponse) deviceResponse;
                         return sunsaResponse.getDevice().getIdDevice();
                     })
-                    .toList();
+                    .collect(Collectors.toList());
             List<String> failedDevices = new ArrayList<>();
             failedDevices.addAll(failedSunsaDevices);
             failedDevices.addAll(failedSomaDevices);
@@ -227,40 +231,40 @@ public class ShadesService {
 
     private List<String> mapIdsToNames(List<String> failedIds) {
         return failedIds.stream()
-            .map(id -> {
-                Device matchingResponse = deviceConfiguration.getDevices().stream()
-                    .filter(response -> response.getId().equals(id))
-                    .findFirst()
-                    .orElse(null);
-                return matchingResponse.getName();
-            })
-            .collect(toList());
+                .map(id -> {
+                    Device matchingResponse = deviceConfiguration.getDevices().stream()
+                            .filter(response -> response.getId().equals(id))
+                            .findFirst()
+                            .orElse(null);
+                    return matchingResponse.getName();
+                })
+                .collect(toList());
     }
 
     private List<Device> mapNamesToDevices(List<String> names) {
         return names.stream()
-            .map(name -> deviceConfiguration.getDevices().stream()
-                .filter(response -> response.getName().equals(name))
-                .findFirst()
-                .orElse(null))
-            .collect(toList());
+                .map(name -> deviceConfiguration.getDevices().stream()
+                        .filter(response -> response.getName().equals(name))
+                        .findFirst()
+                        .orElse(null))
+                .collect(toList());
     }
 
     private String getIdFromIResponse(IResponse response) {
-        if (response instanceof SomaDeviceResponse somaResponse) {
-            return somaResponse.getMac();
-        } else if (response instanceof SunsaPutDeviceResponse sunsaResponse) {
-            return sunsaResponse.getDevice().getIdDevice();
+        if (response instanceof SomaDeviceResponse) {
+            return ((SomaDeviceResponse) response).getMac();
+        } else if (response instanceof SunsaPutDeviceResponse) {
+            return ((SunsaPutDeviceResponse) response).getDevice().getIdDevice();
         }
         return null;
     }
 
     private String getSeasonalFromDeviceId(String id) {
         return deviceConfiguration.getDevices().stream()
-            .filter(device -> device.getId().equals(id))
-            .findFirst()
-            .map(Device::getSeasonalDefault)
-            .orElse(null);
+                .filter(device -> device.getId().equals(id))
+                .findFirst()
+                .map(Device::getSeasonalDefault)
+                .orElse(null);
     }
 
     private boolean isNextHighestMultipleOfTen(String position, String getPosition) {

@@ -1,6 +1,6 @@
 plugins {
 	java
-	id("org.springframework.boot") version "3.3.3"
+	id("org.springframework.boot") version "2.7.18"
 	id("io.spring.dependency-management") version "1.1.6"
 }
 
@@ -8,7 +8,8 @@ group = "com.bsnelson"
 version = "2.0.12"
 
 java {
-	sourceCompatibility = JavaVersion.VERSION_21
+	sourceCompatibility = JavaVersion.VERSION_11
+	targetCompatibility = JavaVersion.VERSION_11
 }
 
 configurations {
