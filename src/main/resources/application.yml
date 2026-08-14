@@ -1,6 +1,7 @@
 server:
-  port: 8082
-  # port: 8081
+  # This is the port deploy.sh pushes to prod (the Pi) as-is. Don't commit
+  # a local-dev override here - run locally with --server.port=8082 instead.
+  port: 8081
 spring:
   application:
     name: shades
