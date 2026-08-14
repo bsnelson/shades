@@ -1,0 +1,26 @@
+{
+  "api": {
+    "soma": {
+      "listDevices": "/list_devices",
+      "getShadeState": "/get_shade_state/{id}",
+      "getBatteryLevel": "/get_battery_level/{id}",
+      "setShadePosition": "/set_shade_position/{id}/{position}"
+    },
+    "sunsa": {
+      "listDevices": "/{idUser}/devices?publicApiKey={apiKey}",
+      "setShadePosition": "/{idUser}/devices/{idDevice}?publicApiKey={apiKey}"
+    }
+  },
+  "devices": [
+    { "id": "d8:85:46:5b:0c:55", "type": "soma", "name": "OfficeLeft", "seasonalDefault": "35", "groups": ["Office", "Seasonal", "All"] },
+    { "id": "de:75:b8:79:20:4c", "type": "soma", "name": "OfficeMiddle", "seasonalDefault": "35", "groups": ["Office", "Seasonal", "All"] },
+    { "id": "d0:e4:4e:28:c5:ae", "type": "soma", "name": "KitchenSide", "seasonalDefault": "10", "groups": ["Kitchen", "Seasonal", "All"] },
+    { "id": "18493", "type": "sunsa", "name": "LivingLeft", "seasonalDefault": "0", "groups": ["Living", "All"] },
+    { "id": "18449", "type": "sunsa", "name": "LivingMiddle", "seasonalDefault": "0", "groups": ["Living", "All"] },
+    { "id": "17803", "type": "sunsa", "name": "LivingRight", "seasonalDefault": "0", "groups": ["Living", "All"] },
+    { "id": "16600", "type": "sunsa", "name": "MikiOffice", "seasonalDefault": "0", "groups": ["All"] },
+    { "id": "17173", "type": "sunsa", "name": "KitchenRear", "seasonalDefault": "0", "groups": ["Kitchen", "All"] },
+    { "id": "17147", "type": "sunsa", "name": "OfficeRight", "seasonalDefault": "40", "groups": ["Office", "All"] },
+    { "id": "17793", "type": "sunsa", "name": "KitchenDoor", "seasonalDefault": "0", "groups": ["Kitchen", "All"] }
+  ]
+}
