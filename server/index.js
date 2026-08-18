@@ -123,7 +123,7 @@ function somaGetBatteryState(device) {
 }
 
 function somaSetShadePosition(device, position) {
-  var target = somaUrl(SOMA_PATHS.setShadePosition, { id: device.id, position: position }) + "?close_upwards=1";
+  var target = somaUrl(SOMA_PATHS.setShadePosition, { id: device.id, position: position }) + "?close_upwards=" + device.closeUpward;
   return requestJson("GET", target).then(function (r) {
     if (!r.json) return { result: "error", name: device.name, mac: device.id };
     var resp = r.json;
