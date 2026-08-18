@@ -14,7 +14,7 @@
   "devices": [
     { "id": "d8:85:46:5b:0c:55", "type": "soma", "name": "OfficeLeft", "seasonalDefault": "35", "closeUpward": 1, "groups": ["Office", "Seasonal", "All"] },
     { "id": "de:75:b8:79:20:4c", "type": "soma", "name": "OfficeMiddle", "seasonalDefault": "35", "closeUpward": 1, "groups": ["Office", "Seasonal", "All"] },
-    { "id": "d0:e4:4e:28:c5:ae", "type": "soma", "name": "KitchenSide", "seasonalDefault": "10", "closeUpward": 0, "groups": ["Kitchen", "Seasonal", "All"] },
+    { "id": "d0:e4:4e:28:c5:ae", "type": "soma", "name": "KitchenSide", "seasonalDefault": "10", "closeUpward": 1, "groups": ["Kitchen", "Seasonal", "All"] },
     { "id": "18493", "type": "sunsa", "name": "LivingLeft", "seasonalDefault": "0", "groups": ["Living", "All"] },
     { "id": "18449", "type": "sunsa", "name": "LivingMiddle", "seasonalDefault": "0", "groups": ["Living", "All"] },
     { "id": "17803", "type": "sunsa", "name": "LivingRight", "seasonalDefault": "0", "groups": ["Living", "All"] },
