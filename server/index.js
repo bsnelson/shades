@@ -336,7 +336,20 @@ function handle(res, resultPromise) {
   });
 }
 
+// Logs one line per request on completion (method, path, status, duration,
+// remote address) to stdout - journald captures and rotates it for us since
+// this runs under systemd, so no file handling needed here.
+function logAccess(req, res, startTime) {
+  res.on("finish", function () {
+    var ms = Date.now() - startTime;
+    var addr = (req.socket && req.socket.remoteAddress) || "-";
+    console.log(new Date().toISOString() + " " + addr + " " + req.method + " " + req.url + " " + res.statusCode + " " + ms + "ms");
+  });
+}
+
 var server = http.createServer(function (req, res) {
+  logAccess(req, res, Date.now());
+
   if (req.method === "OPTIONS") {
     setCors(res);
     res.statusCode = 204;
