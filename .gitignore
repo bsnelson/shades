@@ -1,6 +1,10 @@
 # Has sekrits!
 server/.env
 
+# Vendored deps for the Pi (no npm there) - regenerated locally via `npm install`
+# in server/, deploy.sh syncs the tree over as a deploy artifact.
+server/node_modules
+
 HELP.md
 .gradle
 build/

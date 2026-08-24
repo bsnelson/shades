@@ -4,6 +4,7 @@ var https = require("https");
 var url = require("url");
 var fs = require("fs");
 var path = require("path");
+var mqtt = require("mqtt");
 
 function getEnv(name, fallback) {
   return process.env[name] || fallback;
@@ -14,10 +15,13 @@ var SOMA_CONNECT_IP = getEnv("SOMA_CONNECT_IP", "");
 var SUNSA_BASE_URL = getEnv("SUNSA_BASE_URL", "");
 var SUNSA_API_KEY = getEnv("SUNSA_API_KEY", "");
 var SUNSA_ID_USER = getEnv("SUNSA_ID_USER", "");
+var MQTT_BROKER_URL = getEnv("MQTT_BROKER_URL", "");
+var MQTT_USERNAME = getEnv("MQTT_USERNAME", "");
+var MQTT_PASSWORD = getEnv("MQTT_PASSWORD", "");
 var RETRIES = parseInt(getEnv("RETRIES", "2"), 10);
 
-if (!SOMA_CONNECT_IP || !SUNSA_BASE_URL || !SUNSA_API_KEY || !SUNSA_ID_USER) {
-  console.error("Missing required downstream config in environment (SOMA_CONNECT_IP, SUNSA_BASE_URL, SUNSA_API_KEY, SUNSA_ID_USER).");
+if (!SOMA_CONNECT_IP || !SUNSA_BASE_URL || !SUNSA_API_KEY || !SUNSA_ID_USER || !MQTT_BROKER_URL || !MQTT_USERNAME || !MQTT_PASSWORD) {
+  console.error("Missing required downstream config in environment (SOMA_CONNECT_IP, SUNSA_BASE_URL, SUNSA_API_KEY, SUNSA_ID_USER, MQTT_BROKER_URL, MQTT_USERNAME, MQTT_PASSWORD).");
   process.exit(1);
 }
 
@@ -25,6 +29,7 @@ var deviceConfig = JSON.parse(fs.readFileSync(path.join(__dirname, "devices.json
 var DEVICES = deviceConfig.devices;
 var SOMA_PATHS = deviceConfig.api.soma;
 var SUNSA_PATHS = deviceConfig.api.sunsa;
+var ZIGBEE_BASE_TOPIC = deviceConfig.api.zigbee.baseTopic;
 
 // ---- generic helpers ----
 
@@ -178,41 +183,141 @@ function sunsaSetShadePosition(device, position) {
   });
 }
 
+// ---- Zigbee (Zigbee2MQTT) client ----
+// Zigbee2MQTT publishes device state as retained MQTT messages, so subscribing
+// on startup immediately backfills each device's last-known state - there's no
+// synchronous "get" round-trip the way Soma/Sunsa's HTTP APIs have, so reads
+// below are served straight from this cache.
+
+var zigbeeStateCache = {};
+var zigbeeSetWaiters = {}; // device.id -> [{ targetPosition, timer, resolve }]
+var zigbeeDeviceIds = DEVICES.filter(function (d) { return d.type === "zigbee"; }).map(function (d) { return d.id; });
+
+var mqttClient = mqtt.connect(MQTT_BROKER_URL, {
+  username: MQTT_USERNAME,
+  password: MQTT_PASSWORD,
+  reconnectPeriod: 5000
+});
+
+mqttClient.on("connect", function () {
+  mqttClient.subscribe(ZIGBEE_BASE_TOPIC + "/+");
+});
+
+mqttClient.on("error", function (err) {
+  console.error("MQTT error:", err);
+});
+
+mqttClient.on("message", function (topic, payload) {
+  var id = topic.slice(ZIGBEE_BASE_TOPIC.length + 1);
+  if (zigbeeDeviceIds.indexOf(id) === -1) return; // ignores bridge/other-device topics on the same broker
+
+  var parsed;
+  try { parsed = JSON.parse(payload.toString("utf8")); } catch (e) { return; }
+  zigbeeStateCache[id] = parsed;
+
+  var waiters = zigbeeSetWaiters[id];
+  if (!waiters || !waiters.length || parsed.position === undefined) return;
+  zigbeeSetWaiters[id] = waiters.filter(function (w) {
+    if (parsed.position !== w.targetPosition) return true;
+    clearTimeout(w.timer);
+    w.resolve(parsed);
+    return false;
+  });
+});
+
+function zigbeeGetShadeState(device) {
+  var cached = zigbeeStateCache[device.id];
+  if (!cached) return Promise.resolve(null);
+  var resp = Object.assign({}, cached);
+  resp.name = device.name;
+  return Promise.resolve(resp);
+}
+
+function zigbeeGetBatteryState(device) {
+  var cached = zigbeeStateCache[device.id];
+  if (!cached || cached.battery === undefined) return Promise.resolve({ result: "error", name: device.name });
+  return Promise.resolve({ name: device.name, battery_percentage: cached.battery });
+}
+
+// Publishes the target position and waits (up to 15s) for Zigbee2MQTT to report
+// the shade actually reaching it, so durablePosition's retry logic can tell a
+// real failure (jammed motor, radio drop) from a normal successful move, the
+// same guarantee Soma/Sunsa already get from their synchronous HTTP responses.
+// Z2M's own position convention is inverted from Soma/Sunsa's (0=closed here vs.
+// 100=closed for the other two), so the value is flipped only on the way out -
+// state reads above stay in Z2M's native convention, same as Soma/Sunsa each
+// keep their own upstream shape rather than being normalized to a common one.
+function zigbeeSetShadePosition(device, position) {
+  var targetPosition = 100 - parseInt(position, 10);
+
+  return new Promise(function (resolve) {
+    var timer = setTimeout(function () {
+      zigbeeSetWaiters[device.id] = (zigbeeSetWaiters[device.id] || []).filter(function (w) { return w.timer !== timer; });
+      resolve({ result: "error", name: device.name });
+    }, 15000);
+
+    if (!zigbeeSetWaiters[device.id]) zigbeeSetWaiters[device.id] = [];
+    zigbeeSetWaiters[device.id].push({
+      targetPosition: targetPosition,
+      timer: timer,
+      resolve: function (state) {
+        resolve({ result: "success", name: device.name, position: state.position });
+      }
+    });
+
+    mqttClient.publish(ZIGBEE_BASE_TOPIC + "/" + device.id + "/set", JSON.stringify({ position: targetPosition }));
+  });
+}
+
+function zigbeeGetDeviceList() {
+  return DEVICES.filter(function (d) { return d.type === "zigbee"; }).map(function (d) {
+    var cached = zigbeeStateCache[d.id];
+    var resp = cached ? Object.assign({}, cached) : {};
+    resp.name = d.name;
+    return resp;
+  });
+}
+
 function dispatchGetState(device) {
   if (device.type === "sunsa") return sunsaGetShadeState(device);
   if (device.type === "soma") return somaGetShadeState(device);
+  if (device.type === "zigbee") return zigbeeGetShadeState(device);
   return Promise.resolve(null);
 }
 
 function dispatchGetBattery(device) {
   if (device.type === "sunsa") return sunsaGetBatteryState(device);
   if (device.type === "soma") return somaGetBatteryState(device);
+  if (device.type === "zigbee") return zigbeeGetBatteryState(device);
   return Promise.resolve(null);
 }
 
 function dispatchSetPosition(device, position) {
   if (device.type === "sunsa") return sunsaSetShadePosition(device, position);
   if (device.type === "soma") return somaSetShadePosition(device, position);
+  if (device.type === "zigbee") return zigbeeSetShadePosition(device, position);
   return Promise.resolve(null);
 }
 
 function splitByType(devices, results) {
   var sunsaDevices = [];
   var somaDevices = [];
+  var zigbeeDevices = [];
   devices.forEach(function (device, i) {
     var r = results[i];
     if (!r) return;
     if (device.type === "sunsa") sunsaDevices.push(r);
     else if (device.type === "soma") somaDevices.push(r);
+    else if (device.type === "zigbee") zigbeeDevices.push(r);
   });
-  return { sunsaDevices: sunsaDevices, somaDevices: somaDevices };
+  return { sunsaDevices: sunsaDevices, somaDevices: somaDevices, zigbeeDevices: zigbeeDevices };
 }
 
 // ---- service ----
 
 function listDevices() {
   return Promise.all([somaGetDeviceList(), sunsaGetDeviceList()]).then(function (r) {
-    return { sunsaDevices: r[1].devices, somaDevices: r[0].shades };
+    return { sunsaDevices: r[1].devices, somaDevices: r[0].shades, zigbeeDevices: zigbeeGetDeviceList() };
   });
 }
 
@@ -284,6 +389,8 @@ function durablePosition(useSeasonal, position) {
           if (!r || !r.device || !isNextHighestMultipleOfTen(wantedPos, reportedPos)) {
             failedNames.push(device.name);
           }
+        } else if (device.type === "zigbee") {
+          if (!r || r.result === "error") failedNames.push(device.name);
         }
       });
 
