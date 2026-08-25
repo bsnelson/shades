@@ -225,12 +225,20 @@ mqttClient.on("message", function (topic, payload) {
   });
 });
 
+// Z2M's own position field is in its native convention (0=closed/100=open) -
+// flips it back to this app's convention (100=closed, matching Soma/Sunsa's
+// set-position input) for anything read back out. Mutates and returns resp.
+function zigbeeToAppPosition(resp) {
+  if (resp && resp.position !== undefined) resp.position = 100 - resp.position;
+  return resp;
+}
+
 function zigbeeGetShadeState(device) {
   var cached = zigbeeStateCache[device.id];
   if (!cached) return Promise.resolve(null);
   var resp = Object.assign({}, cached);
   resp.name = device.name;
-  return Promise.resolve(resp);
+  return Promise.resolve(zigbeeToAppPosition(resp));
 }
 
 function zigbeeGetBatteryState(device) {
@@ -244,9 +252,9 @@ function zigbeeGetBatteryState(device) {
 // real failure (jammed motor, radio drop) from a normal successful move, the
 // same guarantee Soma/Sunsa already get from their synchronous HTTP responses.
 // Z2M's own position convention is inverted from Soma/Sunsa's (0=closed here vs.
-// 100=closed for the other two), so the value is flipped only on the way out -
-// state reads above stay in Z2M's native convention, same as Soma/Sunsa each
-// keep their own upstream shape rather than being normalized to a common one.
+// 100=closed for the other two) - flipped on the way out to Z2M, and flipped
+// back on any reported position that comes back, so callers only ever see this
+// app's own convention regardless of device type.
 function zigbeeSetShadePosition(device, position) {
   var targetPosition = 100 - parseInt(position, 10);
 
@@ -261,7 +269,7 @@ function zigbeeSetShadePosition(device, position) {
       targetPosition: targetPosition,
       timer: timer,
       resolve: function (state) {
-        resolve({ result: "success", name: device.name, position: state.position });
+        resolve(zigbeeToAppPosition({ result: "success", name: device.name, position: state.position }));
       }
     });
 
@@ -274,7 +282,7 @@ function zigbeeGetDeviceList() {
     var cached = zigbeeStateCache[d.id];
     var resp = cached ? Object.assign({}, cached) : {};
     resp.name = d.name;
-    return resp;
+    return zigbeeToAppPosition(resp);
   });
 }
 
