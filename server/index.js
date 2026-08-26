@@ -225,12 +225,22 @@ mqttClient.on("message", function (topic, payload) {
   });
 });
 
+// Z2M's own position field is in its native convention (0=closed/100=open) -
+// this app's shared convention is the opposite (0=open/100=closed, confirmed
+// via Soma's own passthrough behavior and Office's long-established "higher
+// number = more closed" usage), so this flips Z2M's value back for anything
+// read out. Mutates and returns resp.
+function zigbeeToAppPosition(resp) {
+  if (resp && resp.position !== undefined) resp.position = 100 - resp.position;
+  return resp;
+}
+
 function zigbeeGetShadeState(device) {
   var cached = zigbeeStateCache[device.id];
   if (!cached) return Promise.resolve(null);
   var resp = Object.assign({}, cached);
   resp.name = device.name;
-  return Promise.resolve(resp);
+  return Promise.resolve(zigbeeToAppPosition(resp));
 }
 
 function zigbeeGetBatteryState(device) {
@@ -243,11 +253,12 @@ function zigbeeGetBatteryState(device) {
 // the shade actually reaching it, so durablePosition's retry logic can tell a
 // real failure (jammed motor, radio drop) from a normal successful move, the
 // same guarantee Soma/Sunsa already get from their synchronous HTTP responses.
-// Z2M's own position convention (0=closed/100=open) already matches this app's
-// convention (confirmed empirically - low numbers are "close to closed upward"
-// for Soma/Sunsa too), so position passes straight through, same as Soma.
+// Z2M's own position convention is inverted from this app's (see
+// zigbeeToAppPosition above) - flipped on the way out to Z2M, and flipped back
+// on any reported position that comes back, so callers only ever see this
+// app's own convention (0=open/100=closed) regardless of device type.
 function zigbeeSetShadePosition(device, position) {
-  var targetPosition = parseInt(position, 10);
+  var targetPosition = 100 - parseInt(position, 10);
 
   return new Promise(function (resolve) {
     var timer = setTimeout(function () {
@@ -260,7 +271,7 @@ function zigbeeSetShadePosition(device, position) {
       targetPosition: targetPosition,
       timer: timer,
       resolve: function (state) {
-        resolve({ result: "success", name: device.name, position: state.position });
+        resolve(zigbeeToAppPosition({ result: "success", name: device.name, position: state.position }));
       }
     });
 
@@ -273,7 +284,7 @@ function zigbeeGetDeviceList() {
     var cached = zigbeeStateCache[d.id];
     var resp = cached ? Object.assign({}, cached) : {};
     resp.name = d.name;
-    return resp;
+    return zigbeeToAppPosition(resp);
   });
 }
 
