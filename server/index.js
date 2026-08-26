@@ -158,10 +158,18 @@ function sunsaGetDeviceList() {
   });
 }
 
+// Fields dropped from the raw Sunsa payload - noisy/unused for this app's
+// purposes. Copied before deleting so the shared sunsaListCache entries (reused
+// by sunsaGetBatteryState and future calls) aren't mutated.
+var SUNSA_STATE_FIELDS_TO_DROP = ["defaultSmartHomeDirection", "temperature", "apiUrl", "blindType"];
+
 function sunsaGetShadeState(device) {
   return sunsaGetDeviceList().then(function (list) {
     var match = (list.devices || []).find(function (d) { return String(d.idDevice) === String(device.id); });
-    return match || null;
+    if (!match) return null;
+    var resp = Object.assign({}, match);
+    SUNSA_STATE_FIELDS_TO_DROP.forEach(function (field) { delete resp[field]; });
+    return resp;
   });
 }
 
