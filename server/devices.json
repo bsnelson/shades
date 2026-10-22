@@ -17,7 +17,7 @@
   "devices": [
     { "id": "office_left", "type": "zigbee", "name": "OfficeLeft", "seasonalDefault": "50", "groups": ["Office", "Seasonal", "All"] },
     { "id": "office_middle", "type": "zigbee", "name": "OfficeMiddle", "seasonalDefault": "50", "groups": ["Office", "Seasonal", "All"] },
-    { "id": "kitchen_side", "type": "zigbee", "name": "KitchenSide", "seasonalDefault": "90", "groups": ["Kitchen", "Seasonal", "All"] },
+    { "id": "kitchen_side", "type": "zigbee", "name": "KitchenSide", "seasonalDefault": "10", "groups": ["Kitchen", "Seasonal", "All"] },
     { "id": "18493", "type": "sunsa", "name": "LivingLeft", "seasonalDefault": "0", "groups": ["Living", "All"] },
     { "id": "18449", "type": "sunsa", "name": "LivingMiddle", "seasonalDefault": "0", "groups": ["Living", "All"] },
     { "id": "17803", "type": "sunsa", "name": "LivingRight", "seasonalDefault": "0", "groups": ["Living", "All"] },
