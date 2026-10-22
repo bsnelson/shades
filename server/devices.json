@@ -1,11 +1,5 @@
 {
   "api": {
-    "soma": {
-      "listDevices": "/list_devices",
-      "getShadeState": "/get_shade_state/{id}",
-      "getBatteryLevel": "/get_battery_level/{id}",
-      "setShadePosition": "/set_shade_position/{id}/{position}"
-    },
     "sunsa": {
       "listDevices": "/{idUser}/devices?publicApiKey={apiKey}",
       "setShadePosition": "/{idUser}/devices/{idDevice}?publicApiKey={apiKey}"

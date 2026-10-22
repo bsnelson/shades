@@ -40,11 +40,25 @@ done
 cd "$(dirname "$0")"
 
 TMP_DIR=$(mktemp -d)
-trap 'rm -rf "$TMP_DIR"' EXIT
+
+# Every ssh/scp below shares one multiplexed connection, so the Bitwarden SSH
+# agent's approval popup fires once per run instead of once per command. The
+# control socket lives in its own short /tmp dir (unix socket paths max out
+# around 104 chars on macOS, too short for mktemp's default /var/folders path),
+# and the master connection is closed on exit so nothing stays authenticated
+# after the script finishes.
+SSH_CTL_DIR=$(mktemp -d /tmp/shades-ssh.XXXXXX)
+SSH_OPTS=(-o ControlMaster=auto -o "ControlPath=$SSH_CTL_DIR/%C" -o ControlPersist=yes)
+
+cleanup() {
+  ssh "${SSH_OPTS[@]}" -O exit "$PI_HOST" >/dev/null 2>&1 || true
+  rm -rf "$TMP_DIR" "$SSH_CTL_DIR"
+}
+trap cleanup EXIT
 
 CHANGED=()
 for f in "${FILES[@]}"; do
-  scp -q "$PI_HOST:$REMOTE_DIR/$f" "$TMP_DIR/$f" 2>/dev/null || true
+  scp -q "${SSH_OPTS[@]}" "$PI_HOST:$REMOTE_DIR/$f" "$TMP_DIR/$f" 2>/dev/null || true
   if ! diff -q "$TMP_DIR/$f" "$LOCAL_DIR/$f" >/dev/null 2>&1; then
     CHANGED+=("$f")
   fi
@@ -52,14 +66,18 @@ done
 
 # node_modules is a vendored tree, not a single diffable text file - regenerate
 # it locally from package.json (no-ops quickly if already up to date), then
-# compare a tarball checksum against what's actually live on the Pi, the same
-# "trust the live target, not a marker file" approach the FILES loop above uses.
+# compare a checksum against what's actually live on the Pi, the same "trust
+# the live target, not a marker file" approach the FILES loop above uses.
+# The checksum covers file paths + contents only (sorted per-file sha256 list),
+# not a tarball: tar output differs between macOS and the Pi (xattrs, owners,
+# mtimes), which made every deploy see node_modules as changed and resync it.
+NM_HASH_CMD='cd node_modules && find . -type f -print0 | LC_ALL=C sort -z | xargs -0 shasum -a 256 | shasum -a 256 | cut -d" " -f1'
 NODE_MODULES_CHANGED=0
 if [[ -f "$LOCAL_DIR/package.json" ]]; then
   echo "==> Ensuring local node_modules matches package.json"
   (cd "$LOCAL_DIR" && npm install --silent)
-  LOCAL_NM_HASH=$(tar -cf - -C "$LOCAL_DIR" node_modules 2>/dev/null | shasum -a 256 | cut -d' ' -f1)
-  REMOTE_NM_HASH=$(ssh "$PI_HOST" "tar -cf - -C $REMOTE_DIR node_modules 2>/dev/null | shasum -a 256 | cut -d' ' -f1" 2>/dev/null || echo "")
+  LOCAL_NM_HASH=$(cd "$LOCAL_DIR" && bash -c "$NM_HASH_CMD" 2>/dev/null)
+  REMOTE_NM_HASH=$(ssh "${SSH_OPTS[@]}" "$PI_HOST" "cd $REMOTE_DIR && $NM_HASH_CMD" 2>/dev/null || echo "")
   if [[ "$LOCAL_NM_HASH" != "$REMOTE_NM_HASH" ]]; then
     NODE_MODULES_CHANGED=1
   fi
@@ -70,11 +88,29 @@ if [[ ${#CHANGED[@]} -eq 0 && "$NODE_MODULES_CHANGED" -eq 0 ]]; then
   exit 0
 fi
 
+# .env holds secrets - its diff shows which keys changed, with each value
+# replaced by a short fingerprint, so the real values never hit the terminal
+# (or an agent's transcript). Comments and blank lines pass through as-is.
+mask_env() {
+  [[ -f "$1" ]] || return 0
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    if [[ "$line" == *=* && "$line" != \#* ]]; then
+      echo "${line%%=*}=<sha:$(printf '%s' "${line#*=}" | shasum -a 256 | cut -c1-8)>"
+    else
+      echo "$line"
+    fi
+  done < "$1"
+}
+
 if [[ ${#CHANGED[@]} -gt 0 ]]; then
   echo "--- changed files: ${CHANGED[*]} ---"
   for f in "${CHANGED[@]}"; do
     echo "--- live on Pi vs. $LOCAL_DIR/$f ---"
-    diff -u "$TMP_DIR/$f" "$LOCAL_DIR/$f" || true
+    if [[ "$f" == ".env" ]]; then
+      diff -u <(mask_env "$TMP_DIR/$f") <(mask_env "$LOCAL_DIR/$f") || true
+    else
+      diff -u "$TMP_DIR/$f" "$LOCAL_DIR/$f" || true
+    fi
   done
 fi
 if [[ "$NODE_MODULES_CHANGED" -eq 1 ]]; then
@@ -92,31 +128,33 @@ else
   fi
 fi
 
-ssh "$PI_HOST" "sudo mkdir -p $REMOTE_DIR"
+ssh "${SSH_OPTS[@]}" "$PI_HOST" "sudo mkdir -p $REMOTE_DIR"
 
 if [[ ${#CHANGED[@]} -gt 0 ]]; then
   echo "==> Copying changed files to Pi"
   for f in "${CHANGED[@]}"; do
-    scp -q "$LOCAL_DIR/$f" "$PI_HOST:/tmp/deploy_$f"
+    scp -q "${SSH_OPTS[@]}" "$LOCAL_DIR/$f" "$PI_HOST:/tmp/deploy_$f"
   done
 
   echo "==> Installing files"
   for f in "${CHANGED[@]}"; do
-    ssh "$PI_HOST" "sudo mv /tmp/deploy_$f $REMOTE_DIR/$f && sudo chown pi:pi $REMOTE_DIR/$f"
+    ssh "${SSH_OPTS[@]}" "$PI_HOST" "sudo mv /tmp/deploy_$f $REMOTE_DIR/$f && sudo chown pi:pi $REMOTE_DIR/$f"
   done
 fi
 
 if [[ "$NODE_MODULES_CHANGED" -eq 1 ]]; then
   echo "==> Syncing node_modules to Pi"
-  ssh "$PI_HOST" "sudo rm -rf $REMOTE_DIR/node_modules"
-  tar -cf - -C "$LOCAL_DIR" node_modules | ssh "$PI_HOST" "sudo tar -xf - -C $REMOTE_DIR && sudo chown -R pi:pi $REMOTE_DIR/node_modules"
+  ssh "${SSH_OPTS[@]}" "$PI_HOST" "sudo rm -rf $REMOTE_DIR/node_modules"
+  # COPYFILE_DISABLE stops macOS tar from adding AppleDouble "._*" metadata
+  # files, which land on the Pi as real junk files (and break the checksum match).
+  COPYFILE_DISABLE=1 tar -cf - -C "$LOCAL_DIR" node_modules | ssh "${SSH_OPTS[@]}" "$PI_HOST" "sudo tar -xf - -C $REMOTE_DIR && sudo chown -R pi:pi $REMOTE_DIR/node_modules"
 fi
 
 echo "==> Restarting $SERVICE"
-ssh "$PI_HOST" "sudo systemctl restart $SERVICE"
+ssh "${SSH_OPTS[@]}" "$PI_HOST" "sudo systemctl restart $SERVICE"
 
 echo "==> Waiting for service to come back up"
-ssh "$PI_HOST" '
+ssh "${SSH_OPTS[@]}" "$PI_HOST" '
   for i in $(seq 1 20); do
     R=$(curl -s -m 2 http://localhost:8081/listNames || true)
     if [ -n "$R" ]; then
